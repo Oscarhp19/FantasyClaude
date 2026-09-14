@@ -29,6 +29,10 @@ este ordenador y otra para el móvil, que tiene que estar en la misma wifi.
 
 Opciones: `--puerto 8080`, `--cada 30` (minutos), `--sin-refresco`.
 
+Si el puerto ya está ocupado por otra copia, el servidor lo dice y sale, en vez
+de arrancar a medias y dejarte mirando datos viejos servidos por el proceso
+anterior.
+
 La primera vez, Windows preguntará si permites que Python acepte conexiones en
 la red privada: hay que decir que sí o el móvil no llegará.
 
@@ -39,8 +43,16 @@ python sync.py && python informe.py && python vista.py
 ```
 
 Tres pasos: `sync.py` baja tu liga real, `informe.py` la cruza con la tendencia
-de FútbolFantasy y `vista.py` genera `vista.html`, una página autónoma que se
-abre en el navegador o se publica tal cual.
+de FútbolFantasy y `vista.py` genera **dos** páginas autónomas: `vista.html`
+(fragmento, para publicar como artifact, que claude.ai envuelve con su propio
+`<head>`) y `vista_local.html` (documento completo con `<meta viewport>`, que es
+el que sirve el servidor). Sin ese viewport, iOS renderiza a 980 px de ancho y
+el diseño móvil no se activa.
+
+En pantalla estrecha las tablas se convierten en fichas —etiqueta y valor por
+línea— en vez de obligarte a hacer scroll lateral. Las cabeceras se ocultan
+visualmente pero siguen ahí, y las tablas llevan roles ARIA explícitos para que
+cambiar el `display` no les quite la semántica.
 
 El cruce de nombres entre las dos fuentes tiene truco: la API oficial abrevia
 (`O. Sancet`, `Á. Valles`) y FútbolFantasy no. Se intenta el nombre completo y,
@@ -253,6 +265,20 @@ Dos endpoints son **públicos, sin token**: `/api/v1/competition/1/players`
 La API oficial no publica ni la **tendencia de precio** ni la **probabilidad de
 alineación**. Eso solo lo tiene FútbolFantasy. La API, a cambio, da el valor
 oficial exacto, tu dinero y el feed de la liga. El análisis cruza ambos.
+
+## Verlo con el PC apagado
+
+`.github/workflows/actualizar.yml` ejecuta el pipeline en los servidores de
+GitHub cada 15 minutos y publica el panel en GitHub Pages. Pasos de puesta en
+marcha en [SETUP-GITHUB.md](SETUP-GITHUB.md).
+
+El login en CI no es interactivo: `laliga_auth.py password` coge
+`LALIGA_EMAIL` y `LALIGA_PASSWORD` del entorno si existen. Cada ejecución
+inicia sesión de cero, así que no hay que persistir ni rotar el refresh token.
+
+La página se publica bajo una ruta que vive en un secreto (`RUTA_SECRETA`), no
+en el repositorio, y lleva `noindex`. No es autenticación: quien tenga la URL,
+entra.
 
 ## Por qué el botón no está en la página publicada
 
