@@ -1,0 +1,743 @@
+<title>Mercado Bernuy League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ground:#F5F3EF; --surface:#FFFFFF; --surface-2:#EDEAE4;
+    --ink:#15181D; --ink-2:#3D434C; --muted:#6B7079; --line:#D8D4CC;
+    --accent:#B8433A; --accent-soft:#F2DEDB;
+    --ok:#1E7A5A; --ok-soft:#DCEDE5;
+    --wait:#9A7B2F; --wait-soft:#F1E8D2;
+    --off:#7C818A; --off-soft:#E6E4E0;
+    --display:"Archivo Narrow","Arial Narrow",Helvetica,sans-serif;
+    --body:"Source Sans 3",-apple-system,Segoe UI,Roboto,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+    --r:6px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14171C; --surface:#1C2027; --surface-2:#252A32;
+      --ink:#E9E6E0; --ink-2:#BFC3CA; --muted:#9096A0; --line:#333941;
+      --accent:#E8776B; --accent-soft:#3A2320;
+      --ok:#54BE93; --ok-soft:#173026;
+      --wait:#D6AC55; --wait-soft:#312716;
+      --off:#868C96; --off-soft:#262A31;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14171C; --surface:#1C2027; --surface-2:#252A32;
+    --ink:#E9E6E0; --ink-2:#BFC3CA; --muted:#9096A0; --line:#333941;
+    --accent:#E8776B; --accent-soft:#3A2320;
+    --ok:#54BE93; --ok-soft:#173026;
+    --wait:#D6AC55; --wait-soft:#312716;
+    --off:#868C96; --off-soft:#262A31;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:var(--body); font-size:15px; line-height:1.55;
+    padding-inline:20px; padding-block:0 56px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px; margin-inline:auto; display:flex; flex-direction:column; gap:34px}
+  h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; letter-spacing:.01em}
+  .num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  .eyebrow{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.13em;
+    font-size:11.5px; font-weight:600; color:var(--muted);
+  }
+  a{color:var(--accent)}
+  :focus-visible{outline:2.5px solid var(--accent); outline-offset:2px; border-radius:3px}
+
+  /* ---------- cabecera ---------- */
+  header{
+    border-bottom:2px solid var(--ink); padding-block:26px 18px;
+    display:flex; flex-wrap:wrap; gap:22px 34px; align-items:flex-end;
+  }
+  header .id{flex:1 1 240px}
+  header h1{font-size:clamp(28px,4.4vw,42px); font-weight:700; line-height:1.02}
+  header .sub{color:var(--muted); font-size:14px; margin-top:5px}
+  .cifras{display:flex; gap:30px; flex-wrap:wrap}
+  .cifra{display:flex; flex-direction:column; gap:2px}
+  .cifra .v{font-family:var(--mono); font-variant-numeric:tabular-nums;
+    font-size:23px; font-weight:700; line-height:1.1}
+  .cifra.destacada .v{color:var(--accent); font-size:28px}
+
+  /* ---------- secciones ---------- */
+  section{display:flex; flex-direction:column; gap:14px}
+  .cab{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap}
+  .cab h2{font-size:20px; font-weight:700}
+  .cab p{margin:0; color:var(--muted); font-size:13.5px; max-width:62ch}
+
+  /* ---------- alerta de clausulas ---------- */
+  .alerta{
+    background:var(--accent-soft); border-left:4px solid var(--accent);
+    border-radius:0 var(--r) var(--r) 0; padding:16px 18px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .alerta > p{margin:0; font-size:14px; color:var(--ink-2)}
+  .riesgos{display:flex; flex-direction:column; gap:1px;
+    background:var(--line); border-radius:var(--r); overflow:hidden}
+  .riesgo{
+    background:var(--surface); padding:10px 13px;
+    display:grid; grid-template-columns:1fr auto auto; gap:4px 16px; align-items:center;
+  }
+  .riesgo .quien{grid-column:1/-1; font-size:12.5px; color:var(--muted)}
+  .riesgo .nom{font-weight:600}
+  .riesgo .margen{
+    font-family:var(--mono); font-size:12.5px; font-weight:700;
+    padding:1px 7px; border-radius:20px; background:var(--accent-soft); color:var(--accent);
+  }
+
+  /* ---------- filtros ---------- */
+  .filtros{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .chip{
+    font-family:var(--display); font-size:13px; font-weight:600; letter-spacing:.03em;
+    padding:6px 13px; border:1.5px solid var(--line); border-radius:20px;
+    background:var(--surface); color:var(--ink-2); cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
+  .chip:hover{border-color:var(--muted)}
+
+  /* ---------- tabla de mercado ---------- */
+  .tabla-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r);
+    background:var(--surface)}
+  table{border-collapse:collapse; width:100%; min-width:760px}
+  caption{text-align:left; padding:10px 14px; color:var(--muted); font-size:13px;
+    border-bottom:1px solid var(--line)}
+  th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line); font-size:14px}
+  thead th{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.09em;
+    font-size:11px; font-weight:600; color:var(--muted);
+    position:sticky; top:0; background:var(--surface); z-index:1;
+  }
+  td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr.no-cabe{opacity:.62}
+  .jug{display:flex; flex-direction:column}
+  .jug .n2{font-weight:600}
+  .jug .m{font-size:12px; color:var(--muted)}
+  .pos{
+    font-family:var(--display); font-size:10.5px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); border:1px solid var(--line);
+    padding:1px 5px; border-radius:3px; white-space:nowrap;
+  }
+  .pill{
+    font-family:var(--display); font-size:11.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; padding:3px 9px; border-radius:3px; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
+  .v-COMPRAR{background:var(--ok-soft); color:var(--ok)}
+  .v-ESPERAR{background:var(--wait-soft); color:var(--wait)}
+  .v-ESPECULATIVO,.v-RELLENO{background:var(--off-soft); color:var(--off)}
+  .v-NO{background:var(--off-soft); color:var(--off); text-decoration:line-through}
+  .sube{color:var(--ok)} .baja{color:var(--accent)}
+  .avisos{display:flex; gap:5px; flex-wrap:wrap; margin-top:3px}
+  .aviso{font-size:11px; padding:1px 6px; border-radius:3px;
+    background:var(--surface-2); color:var(--ink-2); white-space:nowrap}
+  .aviso.dinero{background:var(--accent-soft); color:var(--accent); font-weight:600}
+
+  /* ---------- liga ---------- */
+  .barra{height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; min-width:80px}
+  .barra span{display:block; height:100%; background:var(--muted); border-radius:4px}
+  tr.yo{background:var(--surface-2)}
+  tr.yo .jug .n2::after{content:" — tú"; color:var(--accent); font-weight:700}
+
+  /* ---------- notas ---------- */
+  .notas{border-top:1px solid var(--line); padding-top:18px;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px}
+  .nota h3{font-size:13.5px; font-weight:700; margin-bottom:4px}
+  .nota p{margin:0; font-size:13px; color:var(--muted)}
+
+  .vacio{padding:26px 14px; text-align:center; color:var(--muted); font-size:14px}
+
+  /* ---------- once ---------- */
+  .once{display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:18px; align-items:start}
+  .campo{
+    display:flex; flex-direction:column; gap:12px;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:16px 14px;
+  }
+  /* Una separacion por linea real del equipo, no una retícula decorativa */
+  .linea{display:flex; flex-direction:column; gap:7px; padding-bottom:12px;
+    border-bottom:1px solid var(--line)}
+  .linea:last-child{padding-bottom:0; border-bottom:none}
+  .linea > .eyebrow{font-size:10px}
+  .huecos{display:flex; gap:8px; flex-wrap:wrap}
+  .hueco{
+    flex:1 1 118px; min-width:118px; max-width:190px;
+    border:1px solid var(--line); border-radius:var(--r); padding:7px 9px;
+    display:flex; flex-direction:column; gap:1px; background:var(--ground);
+  }
+  .hueco .nm{font-weight:600; font-size:13.5px; line-height:1.25}
+  .hueco .dt{font-family:var(--mono); font-size:11.5px; color:var(--muted)}
+  .hueco.cap{border-color:var(--accent); border-width:1.5px}
+  .hueco .cinta{
+    font-family:var(--display); font-size:9.5px; font-weight:700; letter-spacing:.09em;
+    color:var(--accent); text-transform:uppercase;
+  }
+  .banca{display:flex; flex-direction:column; gap:8px}
+  .lista-banca{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+  .lista-banca li{background:var(--surface); padding:7px 10px; display:flex;
+    justify-content:space-between; gap:8px; align-items:baseline; font-size:13px}
+  .lista-banca .por{font-family:var(--mono); font-size:11.5px; color:var(--muted); white-space:nowrap}
+  .a-COMPRAR,.a-MANTENER{background:var(--ok-soft); color:var(--ok)}
+  .a-VENDER{background:var(--accent-soft); color:var(--accent)}
+  .a-ACEPTAR{background:var(--ok-soft); color:var(--ok)}
+  .a-REVISAR{background:var(--wait-soft); color:var(--wait)}
+
+  /* ---------- refresco ---------- */
+  .refresco{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .boton{
+    font-family:var(--display); font-size:14px; font-weight:700; letter-spacing:.04em;
+    padding:7px 16px; border:none; border-radius:var(--r);
+    background:var(--ink); color:var(--ground); cursor:pointer;
+  }
+  .boton:hover{background:var(--accent)}
+  .boton[disabled]{background:var(--muted); cursor:progress}
+  .estado-txt{font-size:12.5px; color:var(--muted); font-family:var(--mono)}
+  .estado-txt.mal{color:var(--accent)}
+  .libre{background:var(--ok-soft); color:var(--ok)}
+  .bloqueada{background:var(--off-soft); color:var(--off)}
+  @media (max-width:760px){ .once{grid-template-columns:1fr} }
+
+  /* ---------- movil: las tablas pasan a fichas ----------
+     A partir de aqui cada fila es una tarjeta con etiqueta y valor. Se cambia
+     display, asi que los roles ARIA van explicitos en el marcado para que la
+     tabla siga anunciandose como tabla. */
+  @media (max-width:720px){
+    body{font-size:15.5px; padding-inline:14px; padding-block:0 40px}
+    .wrap{gap:26px}
+
+    .tabla-scroll{overflow-x:visible; border:none; background:none; border-radius:0}
+    table{min-width:0; width:100%}
+    caption{padding:0 0 10px; border:none}
+    thead{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)}
+    tbody{display:flex; flex-direction:column; gap:10px}
+    tr{
+      display:block; background:var(--surface);
+      border:1px solid var(--line); border-radius:var(--r); padding:12px 13px;
+    }
+    tr.yo{border-color:var(--accent); border-width:1.5px}
+    th[scope="row"]{display:block; border:none; padding:0 0 9px}
+    td{
+      display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+      border:none; padding:4px 0; text-align:right;
+    }
+    td::before{
+      content:attr(data-col); text-align:left; flex:0 0 auto;
+      font-family:var(--display); text-transform:uppercase; letter-spacing:.08em;
+      font-size:10.5px; font-weight:600; color:var(--muted);
+    }
+    td:empty{display:none}
+    td .barra{flex:1 1 auto; max-width:60%}
+
+    /* dedo, no raton: objetivos de toque comodos */
+    .chip{padding:10px 16px; font-size:14px}
+    .boton{padding:11px 20px; font-size:15px}
+    .filtros{gap:7px}
+
+    header{padding-block:18px 14px; gap:16px 22px}
+    header h1{font-size:27px}
+    .cifras{gap:16px 26px; width:100%}
+    .cifra .v{font-size:20px} .cifra.destacada .v{font-size:26px}
+    .cab h2{font-size:18.5px}
+
+    .riesgo{grid-template-columns:1fr auto; gap:3px 12px}
+    .alerta{padding:14px 15px}
+    .hueco{flex:1 1 calc(50% - 4px); min-width:0; max-width:none}
+    .notas{gap:16px}
+  }
+  @media (max-width:400px){
+    .hueco{flex:1 1 100%}
+    header h1{font-size:24px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<script id="datos" type="application/json">__DATOS__</script>
+
+<div class="wrap">
+  <header>
+    <div class="id">
+      <p class="eyebrow" id="eyebrow-liga">Mercado diario</p>
+      <h1 id="h-liga">—</h1>
+      <p class="sub" id="h-sub">—</p>
+    </div>
+    <div class="cifras">
+      <div class="cifra destacada">
+        <span class="eyebrow">Tu dinero</span>
+        <span class="v" id="c-dinero">—</span>
+      </div>
+      <div class="cifra" id="bloque-refresco" hidden>
+        <span class="eyebrow">Datos</span>
+        <span class="refresco">
+          <button type="button" class="boton" id="btn-actualizar">Actualizar</button>
+          <span class="estado-txt" id="estado-txt" role="status" aria-live="polite"></span>
+        </span>
+      </div>
+      <div class="cifra">
+        <span class="eyebrow">Tu plantilla</span>
+        <span class="v" id="c-plantilla">—</span>
+      </div>
+      <div class="cifra">
+        <span class="eyebrow">Prima media liga</span>
+        <span class="v" id="c-prima">—</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="sec-alerta" hidden>
+    <div class="cab">
+      <h2>Cláusulas a tiro</h2>
+      <p>Tus jugadores sin escudo cuya cláusula entra en el saldo de algún rival. Ordenados por margen: los de arriba te los quitan casi por lo que valen.</p>
+    </div>
+    <div class="alerta">
+      <p id="alerta-resumen"></p>
+      <div class="riesgos" id="riesgos"></div>
+    </div>
+  </section>
+
+  <section id="sec-golpes" hidden>
+    <div class="cab">
+      <h2>Clausulazos a tu alcance</h2>
+      <p id="golpes-sub"></p>
+    </div>
+    <div class="tabla-scroll">
+      <table role="table">
+        <thead role="rowgroup">
+          <tr>
+            <th scope="col">Jugador</th>
+            <th scope="col">Se lo quitas a</th>
+            <th scope="col" class="n">Cláusula</th>
+            <th scope="col" class="n">Sobre valor</th>
+            <th scope="col" class="n">Esper.</th>
+            <th scope="col" class="n">Te queda</th>
+            <th scope="col">Cuándo</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" id="filas-golpes"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sec-once">
+    <div class="cab">
+      <h2>Once con más puntos esperados</h2>
+      <p id="once-sub"></p>
+    </div>
+    <div class="once">
+      <div class="campo" id="campo"></div>
+      <div class="banca">
+        <p class="eyebrow">Fuera del once</p>
+        <ul class="lista-banca" id="banca"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-ofertas" hidden>
+    <div class="cab">
+      <h2>Ofertas por tus jugadores</h2>
+      <p id="ofertas-sub"></p>
+    </div>
+    <div class="tabla-scroll">
+      <table role="table">
+        <thead role="rowgroup">
+          <tr>
+            <th scope="col">Jugador</th>
+            <th scope="col" class="n">Valor</th>
+            <th scope="col" class="n">Te ofrecen</th>
+            <th scope="col" class="n">Prima</th>
+            <th scope="col">Caduca</th>
+            <th scope="col">Qué hacer</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" id="filas-ofertas"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="cab">
+      <h2>Tu plantilla</h2>
+      <p id="plantilla-sub"></p>
+    </div>
+    <div class="tabla-scroll">
+      <table role="table">
+        <thead role="rowgroup">
+          <tr>
+            <th scope="col">Jugador</th>
+            <th scope="col">Pos.</th>
+            <th scope="col" class="n">Valor</th>
+            <th scope="col" class="n">7 días</th>
+            <th scope="col" class="n">Juega</th>
+            <th scope="col" class="n">Media</th>
+            <th scope="col" class="n">Cláusula</th>
+            <th scope="col">Recomendación</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" id="filas-plantilla"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="cab">
+      <h2>Mercado de hoy</h2>
+      <p id="mercado-sub"></p>
+    </div>
+    <div class="filtros" role="group" aria-label="Filtrar el mercado">
+      <button class="chip" type="button" id="f-todos" data-filtro="todos" aria-pressed="true">Todos</button>
+      <button class="chip" type="button" id="f-comprar" data-filtro="COMPRAR" aria-pressed="false">Comprar</button>
+      <button class="chip" type="button" id="f-esperar" data-filtro="ESPERAR" aria-pressed="false">Esperar</button>
+      <button class="chip" type="button" id="f-descartados" data-filtro="NO COMPRAR" aria-pressed="false">Descartados</button>
+      <button class="chip" type="button" id="f-cabe" data-toggle="cabe" aria-pressed="false">Solo lo que me cabe</button>
+    </div>
+    <div class="tabla-scroll">
+      <table role="table">
+        <caption id="tabla-caption"></caption>
+        <thead role="rowgroup">
+          <tr>
+            <th scope="col">Jugador</th>
+            <th scope="col">Pos.</th>
+            <th scope="col" class="n">Valor</th>
+            <th scope="col" class="n">Piden</th>
+            <th scope="col" class="n">7 días</th>
+            <th scope="col" class="n">Juega</th>
+            <th scope="col" class="n">Media</th>
+            <th scope="col" class="n">Esper.</th>
+            <th scope="col">Veredicto</th>
+            <th scope="col" class="n">Tu máximo</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" id="filas"></tbody>
+      </table>
+    </div>
+    <p class="vacio" id="vacio" hidden>Ningún jugador cumple ese filtro.</p>
+  </section>
+
+  <section>
+    <div class="cab">
+      <h2>La liga</h2>
+      <p>Saldo reconstruido desde el histórico de fichajes. El tuyo es el real; el de los demás es un mínimo.</p>
+    </div>
+    <div class="tabla-scroll">
+      <table role="table">
+        <thead role="rowgroup">
+          <tr>
+            <th scope="col" class="n">#</th>
+            <th scope="col">Mánager</th>
+            <th scope="col" class="n">Puntos</th>
+            <th scope="col" class="n">Plantilla</th>
+            <th scope="col" class="n">Saldo</th>
+            <th scope="col">Capacidad de compra</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" id="clasificacion"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notas" aria-label="Cómo se calcula">
+    <div class="nota">
+      <h3>Tu máximo</h3>
+      <p>Prima solo a quien sube: +15% si sube sostenido, +10% si gira al alza, −5% si cae frenando, −10% si cae acelerando. Cero si no va a jugar o no puntúa.</p>
+    </div>
+    <div class="nota">
+      <h3>Puntos esperados</h3>
+      <p>Media cuando juega × probabilidad de alineación. Sin probabilidad publicada no se calcula, y la fila se marca como tal en vez de inventarla.</p>
+    </div>
+    <div class="nota">
+      <h3>Saldo de los rivales</h3>
+      <p id="nota-saldo">El histórico no registra las recompensas, así que las cajas salen cortas. Se mide el desvío con tu dinero real y se suma a todos.</p>
+    </div>
+    <div class="nota">
+      <h3>De dónde sale</h3>
+      <p id="nota-fuentes">Valor, media y estado, de la API oficial de LaLiga Fantasy. Tendencia de precio y probabilidad de jugar, de FútbolFantasy.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const D = JSON.parse(document.getElementById('datos').textContent);
+  const eur = n => (n||n===0) ? Math.round(n).toLocaleString('es-ES') + ' €' : '—';
+  const pct = n => (n===null||n===undefined) ? '—' : (n>0?'+':'') + n.toFixed(1) + '%';
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // cabecera
+  document.getElementById('h-liga').textContent = D.liga.nombre;
+  const mio = D.equipos.find(e => e.team_id === D.yo.team_id) || {};
+  document.getElementById('h-sub').textContent =
+    `${D.yo.manager} · ${mio.posicion}.º de ${D.liga.managers} · ${mio.puntos} puntos`;
+  const f = new Date(D.generado);
+  document.getElementById('eyebrow-liga').textContent =
+    'Mercado del ' + f.toLocaleDateString('es-ES',{day:'numeric',month:'long'}) +
+    ', ' + f.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('c-dinero').textContent = eur(D.yo.dinero);
+  document.getElementById('c-plantilla').textContent = eur(D.yo.valor_plantilla);
+  document.getElementById('c-prima').textContent =
+    D.prima_media_liga_pct==null ? '—' : pct(D.prima_media_liga_pct);
+
+  // clausulas
+  const al = D.alertas_clausula || [];
+  if (al.length){
+    document.getElementById('sec-alerta').hidden = false;
+    const baratas = al.filter(a => a.margen_pct !== null && a.margen_pct <= 20).length;
+    document.getElementById('alerta-resumen').textContent =
+      `${al.length} de tus jugadores tienen la cláusula al alcance de alguien` +
+      (baratas ? `, y ${baratas} a menos de un 20% sobre su valor.` : '.');
+    document.getElementById('riesgos').innerHTML = al.slice(0,8).map(a => `
+      <div class="riesgo">
+        <span class="nom">${esc(a.jugador)}</span>
+        <span class="num">${eur(a.clausula)}</span>
+        <span class="margen">${a.margen_pct===null?'—':pct(a.margen_pct)}</span>
+        <span class="quien">Pueden pagarla: ${esc(a.pueden_pagarla.join(', '))}</span>
+      </div>`).join('');
+  }
+
+  // clausulazos
+  const G = D.clausulazos || [];
+  if (G.length){
+    document.getElementById('sec-golpes').hidden = false;
+    const libres = G.filter(c => !c.bloqueada);
+    document.getElementById('golpes-sub').textContent =
+      `${G.length} jugadores rivales cuya cláusula te cabe en la caja. ` +
+      (libres.length
+        ? `${libres.length} puedes pagarla ya.`
+        : 'Ninguna está abierta ahora mismo: la columna de la derecha dice cuándo se abre cada una.');
+    document.getElementById('filas-golpes').innerHTML = G.slice(0,15).map(c => {
+      const cuando = c.bloqueada
+        ? `<span class="pill bloqueada">${new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</span>`
+        : '<span class="pill libre">Ahora</span>';
+      const av = c.sin_probabilidad ? '<span class="aviso">sin dato de alineación</span>' : '';
+      return `<tr role="row" class="${c.bloqueada?'no-cabe':''}">
+        <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
+          <span class="n2">${esc(c.nombre)}</span>
+          <span class="m">${esc(c.posicion||'')}${c.equipo?' · '+esc(c.equipo):''} · media ${c.media_puntos}</span></span>
+          <span class="avisos">${av}</span></th>
+        <td role="cell" data-col="Se lo quitas a">${esc(c.duenio)}</td>
+        <td role="cell" data-col="Cláusula" class="n">${eur(c.clausula)}</td>
+        <td role="cell" data-col="Sobre valor" class="n ${c.sobreprecio_pct>20?'baja':''}">${pct(c.sobreprecio_pct)}</td>
+        <td role="cell" data-col="Esperados" class="n">${c.esperados.toFixed(1)}</td>
+        <td role="cell" data-col="Te queda" class="n">${eur(c.te_queda)}</td>
+        <td role="cell" data-col="Cuándo">${cuando}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // once optimo
+  const O = D.once_optimo;
+  if (O){
+    document.getElementById('once-sub').textContent =
+      `Formación ${O.formacion} · ${O.total} puntos esperados · capitán ${O.capitan}` +
+      (D.yo.formacion_actual ? ` · ahora juegas ${D.yo.formacion_actual.join(',')}.` : '.');
+    const LINEAS = [[1,'Portería'],[2,'Defensa'],[3,'Centro del campo'],[4,'Ataque'],[5,'Entrenador']];
+    document.getElementById('campo').innerHTML = LINEAS.map(([pid,tit]) => {
+      const en = O.once.filter(p => p.posicion_id === pid);
+      if (!en.length) return '';
+      return `<div class="linea"><p class="eyebrow">${tit}</p><div class="huecos">${
+        en.map(p => `<div class="hueco ${p.nombre===O.capitan?'cap':''}">
+            ${p.nombre===O.capitan?'<span class="cinta">Capitán</span>':''}
+            <span class="nm">${esc(p.nombre)}</span>
+            <span class="dt">${p.esperados.toFixed(1)} esp · ${p.probabilidad==null?'s/d':p.probabilidad+'%'}</span>
+          </div>`).join('')
+      }</div></div>`;
+    }).join('');
+    document.getElementById('banca').innerHTML = (O.banquillo||[]).map(b => `
+      <li><span>${esc(b.nombre)}</span><span class="por">${
+        b.estado && b.estado!=='ok' ? esc(b.estado)
+        : b.probabilidad===0 ? 'no juega'
+        : (b.esperados==null ? '—' : b.esperados.toFixed(1)+' esp')
+      }</span></li>`).join('') || '<li><span>Nadie: juegan los 14.</span></li>';
+  } else {
+    document.getElementById('sec-once').hidden = true;
+  }
+
+  // ofertas recibidas
+  const P = D.mi_plantilla || [];
+  const conOferta = P.filter(p => p.mejor_oferta);
+  if (conOferta.length){
+    document.getElementById('sec-ofertas').hidden = false;
+    const buenas = conOferta.filter(p => p.oferta_por_encima_del_mercado).length;
+    document.getElementById('ofertas-sub').textContent =
+      `${conOferta.length} ofertas pendientes` +
+      (D.prima_media_liga_pct!=null ? `. La prima media en tu liga es ${pct(D.prima_media_liga_pct)}, `
+        + `así que ${buenas>0?`${buenas} está${buenas>1?'n':''} por encima de lo normal`:'ninguna destaca'}.` : '.');
+    document.getElementById('filas-ofertas').innerHTML = conOferta.map(p => {
+      const cad = p.ofertas[0] && p.ofertas[0].caduca
+        ? new Date(p.ofertas[0].caduca).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        : '—';
+      let qh = 'Ignórala', cls = 'a-REVISAR';
+      if (p.accion === 'ACEPTAR OFERTA'){ qh = 'Acéptala'; cls='a-ACEPTAR'; }
+      else if (p.accion === 'VENDER' && !p.oferta_baja){ qh = 'Acéptala: es un descarte'; cls='a-ACEPTAR'; }
+      else if (p.accion === 'VENDER' && p.oferta_baja){ qh = 'Véndelo, pero no a este precio'; cls='a-VENDER'; }
+      else if (p.accion === 'MANTENER'){ qh = 'Ignórala'; cls='a-REVISAR'; }
+      return `<tr role="row">
+        <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
+          <span class="n2">${esc(p.nombre)}</span>
+          <span class="m">${esc(p.posicion||'')}${p.equipo?' · '+esc(p.equipo):''}</span></span></th>
+        <td role="cell" data-col="Valor" class="n">${eur(p.valor)}</td>
+        <td role="cell" data-col="Te ofrecen" class="n">${eur(p.mejor_oferta)}</td>
+        <td role="cell" data-col="Prima" class="n ${p.prima_oferta_pct>0?'sube':p.prima_oferta_pct<0?'baja':''}">${pct(p.prima_oferta_pct)}</td>
+        <td role="cell" data-col="Caduca" class="n">${cad}</td>
+        <td role="cell" data-col="Qué hacer"><span class="pill ${cls}">${qh}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // plantilla
+  const ventas = P.filter(p => p.accion==='VENDER' || p.accion==='ACEPTAR OFERTA').length;
+  document.getElementById('plantilla-sub').textContent =
+    `${P.length} jugadores. ${ventas? `${ventas} con recomendación de venta.` : 'Ninguno para vender ahora mismo.'}`;
+  document.getElementById('filas-plantilla').innerHTML = P.map(p => {
+    const av=[];
+    if(p.escudo) av.push('<span class="aviso">con escudo</span>');
+    if(p.oferta_baja) av.push('<span class="aviso">oferta bajo su valor</span>');
+    if(p.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
+    if(p.estado && p.estado!=='ok') av.push(`<span class="aviso dinero">${esc(p.estado)}</span>`);
+    const cls = 'a-' + (p.accion==='ACEPTAR OFERTA' ? 'ACEPTAR' : p.accion);
+    return `<tr role="row">
+      <th scope="row" role="rowheader" style="font-weight:400">
+        <span class="jug"><span class="n2">${esc(p.nombre)}</span>
+        <span class="m">${esc(p.equipo||'')}${p.equipo?' · ':''}${esc(p.razon_venta)}</span></span>
+        <span class="avisos">${av.join('')}</span></th>
+      <td role="cell" data-col="Posición"><span class="pos">${esc((p.posicion||'').slice(0,3))}</span></td>
+      <td role="cell" data-col="Valor" class="n">${eur(p.valor)}</td>
+      <td role="cell" data-col="7 días" class="n ${p.var_7d>0?'sube':p.var_7d<0?'baja':''}">${pct(p.var_7d)}</td>
+      <td role="cell" data-col="Juega" class="n">${p.probabilidad==null?'—':p.probabilidad+'%'}</td>
+      <td role="cell" data-col="Media" class="n">${p.media_puntos==null?'—':p.media_puntos.toFixed(1)}</td>
+      <td role="cell" data-col="Cláusula" class="n">${eur(p.clausula)}</td>
+      <td role="cell" data-col="Recomendación"><span class="pill ${cls}">${esc(p.accion)}</span></td>
+    </tr>`;
+  }).join('');
+
+  // mercado
+  const M = D.mercado || [];
+  const compras = M.filter(r => r.veredicto==='COMPRAR');
+  const caben = compras.filter(r => r.te_cabe);
+  document.getElementById('mercado-sub').textContent =
+    `${M.length} jugadores en el mercado. ${compras.length} pasan el corte` +
+    (compras.length ? `, ${caben.length} dentro de tu presupuesto.` : '.');
+  document.getElementById('tabla-caption').textContent =
+    'Ordenado por veredicto y después por puntos esperados.';
+
+  let filtro='todos', soloCabe=false;
+  const tb = document.getElementById('filas'), vacio = document.getElementById('vacio');
+
+  function claseV(v){
+    return v==='NO COMPRAR' ? 'v-NO' : 'v-' + v;
+  }
+  function pinta(){
+    const vis = M.filter(r =>
+      (filtro==='todos' || r.veredicto===filtro) && (!soloCabe || r.te_cabe));
+    vacio.hidden = vis.length>0;
+    tb.innerHTML = vis.map(r => {
+      const av=[];
+      if(!r.te_cabe) av.push('<span class="aviso dinero">no te cabe</span>');
+      if(r.caro_de_salida) av.push('<span class="aviso">piden más de tu máximo</span>');
+      if(r.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
+      if(r.posicion_cubierta) av.push('<span class="aviso">posición cubierta</span>');
+      if(r.lo_vende) av.push(`<span class="aviso">lo vende ${esc(r.lo_vende)}</span>`);
+      if(r.pujas) av.push(`<span class="aviso">${r.pujas} puja${r.pujas>1?'s':''}</span>`);
+      const v7 = r.var_7d;
+      const rival = r.rival ? `J${r.jornada} · ${esc(r.rival)}` : esc(r.razon);
+      return `<tr role="row" class="${r.te_cabe?'':'no-cabe'}">
+        <th scope="row" role="rowheader" style="font-weight:400">
+          <span class="jug"><span class="n2">${esc(r.nombre)}</span>
+          <span class="m">${esc(r.equipo||'')}${r.equipo?' · ':''}${rival}</span></span>
+          <span class="avisos">${av.join('')}</span>
+        </th>
+        <td role="cell" data-col="Posición"><span class="pos">${esc((r.posicion||'').slice(0,3))}</span></td>
+        <td role="cell" data-col="Valor" class="n">${eur(r.valor)}</td>
+        <td role="cell" data-col="Piden" class="n">${eur(r.precio_venta)}</td>
+        <td role="cell" data-col="7 días" class="n ${v7>0?'sube':v7<0?'baja':''}">${pct(v7)}</td>
+        <td role="cell" data-col="Juega" class="n">${r.probabilidad==null?'—':r.probabilidad+'%'}</td>
+        <td role="cell" data-col="Media" class="n">${r.media_puntos==null?'—':r.media_puntos.toFixed(1)}</td>
+        <td role="cell" data-col="Esperados" class="n">${r.puntos_esperados==null?'—':r.puntos_esperados.toFixed(1)}</td>
+        <td role="cell" data-col="Veredicto"><span class="pill ${claseV(r.veredicto)}">${esc(r.veredicto)}</span></td>
+        <td role="cell" data-col="Tu máximo" class="n">${r.precio_max?eur(r.precio_max):'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    if(b.dataset.toggle==='cabe'){
+      soloCabe = !soloCabe; b.setAttribute('aria-pressed', String(soloCabe));
+    } else {
+      filtro = b.dataset.filtro;
+      document.querySelectorAll('.chip[data-filtro]').forEach(o =>
+        o.setAttribute('aria-pressed', String(o===b)));
+    }
+    pinta();
+  }));
+  pinta();
+
+  // liga
+  const maxSaldo = Math.max(...D.equipos.map(e => e.saldo_estimado||0), 1);
+  document.getElementById('clasificacion').innerHTML = D.equipos.map(e => `
+    <tr role="row" class="${e.team_id===D.yo.team_id?'yo':''}">
+      <td role="cell" data-col="Puesto" class="n">${e.posicion}</td>
+      <th scope="row" role="rowheader" style="font-weight:400"><span class="jug"><span class="n2">${esc(e.manager)}</span></span></th>
+      <td role="cell" data-col="Puntos" class="n">${e.puntos}</td>
+      <td role="cell" data-col="Plantilla" class="n">${eur(e.valor_plantilla)}</td>
+      <td role="cell" data-col="Saldo" class="n">${eur(e.saldo_estimado)}</td>
+      <td role="cell" data-col="Capacidad"><div class="barra"><span style="width:${Math.round(100*(e.saldo_estimado||0)/maxSaldo)}%"></span></div></td>
+    </tr>`).join('');
+
+  if((D.sin_emparejar||[]).length){
+    document.getElementById('nota-fuentes').textContent +=
+      ' Sin tendencia para: ' + D.sin_emparejar.join(', ') + '.';
+  }
+
+  // ---- refresco: solo existe si la sirve servidor.py ----
+  // Publicada como artifact la pagina es una foto fija, asi que el boton se
+  // oculta en vez de ofrecer algo que no puede hacer.
+  const btn = document.getElementById('btn-actualizar');
+  const txt = document.getElementById('estado-txt');
+  const generado = D.generado;
+  let esperando = false;
+
+  const hace = iso => {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (m < 1) return 'ahora mismo';
+    if (m < 60) return `hace ${m} min`;
+    return `hace ${Math.round(m/60)} h`;
+  };
+
+  async function mira(){
+    let s;
+    try { s = await (await fetch('/estado', {cache:'no-store'})).json(); }
+    catch { return null; }
+    document.getElementById('bloque-refresco').hidden = false;
+    btn.disabled = s.actualizando;
+    txt.classList.toggle('mal', Boolean(s.ultimo_error));
+    if (s.actualizando){
+      txt.textContent = 'actualizando…';
+      esperando = true;
+    } else if (s.ultimo_error){
+      txt.textContent = s.ultimo_error;
+    } else {
+      txt.textContent = hace(s.ultimo_ok || generado);
+      // Si el servidor rehizo los datos mientras mirabamos, recargamos para verlos.
+      if (esperando && s.ultimo_ok && s.ultimo_ok > generado){ location.reload(); }
+      esperando = false;
+    }
+    return s;
+  }
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; txt.textContent = 'actualizando…'; esperando = true;
+    try { await fetch('/actualizar', {method:'POST'}); }
+    catch { txt.textContent = 'no se pudo avisar al servidor'; txt.classList.add('mal'); btn.disabled = false; }
+  });
+
+  mira().then(s => {
+    if (s === null) return;          // servida como artifact: sin controles
+    setInterval(mira, 10000);        // el pipeline tarda un par de minutos
+  });
+})();
+</script>

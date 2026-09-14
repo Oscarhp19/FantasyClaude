@@ -1,0 +1,68 @@
+name: Actualizar panel
+
+on:
+  schedule:
+    # Cada 15 minutos. GitHub puede retrasar los cron cuando hay mucha carga,
+    # asi que en la practica a veces sale cada 17-20.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}   # y a mano desde la pestana Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Sin paso de dependencias: todo el proyecto es libreria estandar.
+
+      - name: Iniciar sesion en LaLiga
+        env:
+          LALIGA_EMAIL: ${{ secrets.LALIGA_EMAIL }}
+          LALIGA_PASSWORD: ${{ secrets.LALIGA_PASSWORD }}
+        run: python laliga_auth.py password
+
+      - name: Generar el panel
+        run: |
+          python sync.py
+          python informe.py
+          python vista.py
+
+      - name: Montar el sitio
+        env:
+          RUTA: ${{ secrets.RUTA_SECRETA }}
+        run: |
+          if [ -z "$RUTA" ]; then
+            echo "Falta el secreto RUTA_SECRETA" >&2
+            exit 1
+          fi
+          mkdir -p "sitio/$RUTA"
+          cp vista_local.html "sitio/$RUTA/index.html"
+          # La raiz no lleva nada: quien pruebe el dominio a secas no ve la liga.
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>No hay nada aqui</title>' > sitio/index.html
+          printf 'User-agent: *\nDisallow: /\n' > sitio/robots.txt
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sitio
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

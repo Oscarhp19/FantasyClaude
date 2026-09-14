@@ -1,0 +1,3 @@
+# Un jugador por linea. Todo lo que vaya tras # se ignora.
+Dmitrovic
+Marcos Alonso
