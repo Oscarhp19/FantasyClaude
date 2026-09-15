@@ -269,8 +269,9 @@ oficial exacto, tu dinero y el feed de la liga. El análisis cruza ambos.
 ## Verlo con el PC apagado
 
 `.github/workflows/actualizar.yml` ejecuta el pipeline en los servidores de
-GitHub cada 15 minutos y publica el panel en GitHub Pages. Pasos de puesta en
-marcha en [SETUP-GITHUB.md](SETUP-GITHUB.md).
+GitHub cada 15 minutos y publica el panel en GitHub Pages. Se pone en marcha
+con un solo comando, `python configurar_github.py`: detalles en
+[SETUP-GITHUB.md](SETUP-GITHUB.md).
 
 El login en CI no es interactivo: `laliga_auth.py password` coge
 `LALIGA_EMAIL` y `LALIGA_PASSWORD` del entorno si existen. Cada ejecución

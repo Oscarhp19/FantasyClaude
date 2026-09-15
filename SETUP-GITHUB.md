@@ -1,93 +1,56 @@
 # Panel siempre disponible, con el PC apagado
 
 GitHub ejecuta el pipeline cada 15 minutos en sus servidores y publica la
-página. Tu ordenador no pinta nada: puede estar apagado.
+página en [Oscarhp19/FantasyClaude](https://github.com/Oscarhp19/FantasyClaude).
+Tu ordenador no pinta nada: puede estar apagado.
 
-El repositorio local ya está creado y con el primer commit hecho. Faltan cinco
-pasos, todos en la web de GitHub.
+## Puesta en marcha: un comando
 
-## 1. Crea el repositorio
-
-En [github.com/new](https://github.com/new):
-
-- Nombre: `fantasy` (o el que quieras)
-- Visibilidad: **Public**
-- **No** marques nada de "Initialize with README"
-
-Tiene que ser público. En las cuentas gratuitas, GitHub Pages solo funciona
-desde repos públicos, y los minutos de Actions solo son ilimitados en repos
-públicos. Lo que se publica está protegido por la ruta secreta del paso 3.
-
-## 2. Súbelo
-
-Desde `fantasy/`, cambiando `TU-USUARIO`:
+Desde `fantasy/`:
 
 ```bash
-git remote add origin https://github.com/TU-USUARIO/fantasy.git
-git push -u origin main
+python configurar_github.py
 ```
 
-Tus datos no viajan: `data/` está en `.gitignore`, así que ni el token ni la
-plantilla ni el dinero salen de tu disco. Solo sube el código.
+Te va a pedir dos cosas, y nada más:
 
-## 3. Añade los tres secretos
+1. **Autorizar GitHub.** Si tu credencial ha caducado se abre una ventana: inicia
+   sesión y pulsa *Authorize*.
+2. **Tu email y contraseña de LaLiga.** Se comprueban contra LaLiga antes de
+   guardarlas, así que una errata se detecta en el momento y no quince minutos
+   después con el robot fallando.
 
-En **Settings → Secrets and variables → Actions → New repository secret**:
+El resto lo hace solo: sube el código, guarda los tres secretos cifrados
+(`LALIGA_EMAIL`, `LALIGA_PASSWORD`, `RUTA_SECRETA`), activa Pages, lanza la
+primera actualización, espera a que termine e imprime tu URL. También la deja en
+`data/panel_url.txt`, que no se sube al repositorio.
 
-| Nombre | Valor |
-|---|---|
-| `LALIGA_EMAIL` | tu email de LaLiga Fantasy |
-| `LALIGA_PASSWORD` | tu contraseña de LaLiga Fantasy |
-| `RUTA_SECRETA` | una cadena larga al azar, p. ej. `k7f2p9x4m1q8` |
+Tus contraseñas se teclean en tu terminal y viajan cifradas directamente a
+GitHub. No se escriben en disco ni pasan por ningún chat.
 
-`RUTA_SECRETA` es la carpeta donde se publica el panel. Al ser un secreto, no
-aparece en el repositorio aunque sea público: nadie puede deducir la URL
-leyendo el código.
-
-Genera una así:
-
-```bash
-python -c "import secrets; print(secrets.token_hex(8))"
-```
-
-## 4. Activa Pages
-
-En **Settings → Pages → Build and deployment → Source**, elige
-**GitHub Actions**. No toques nada más.
-
-## 5. Lánzalo una vez a mano
-
-En **Actions → Actualizar panel → Run workflow**. Tarda un par de minutos.
-
-Cuando acabe en verde, tu panel está en:
-
-```
-https://TU-USUARIO.github.io/fantasy/TU-RUTA-SECRETA/
-```
-
-Ábrela en el iPhone y añádela a la pantalla de inicio.
+Se puede relanzar sin miedo: reutiliza la ruta secreta de la vez anterior, así
+que la URL no cambia.
 
 ## Qué tener en cuenta
 
-**No es una contraseña.** Cualquiera con esa URL ve tu panel. La ruta es
-imposible de adivinar y la página lleva `noindex`, así que no la encontrará un
-buscador, pero si compartes el enlace, compartes los datos.
+**No es una contraseña.** Cualquiera con la URL ve tu panel. La ruta es un
+secreto, no aparece en el repositorio aunque sea público, y la página lleva
+`noindex`, así que no la encontrará un buscador. Pero si compartes el enlace,
+compartes los datos.
 
 **El cron se retrasa.** GitHub no garantiza la puntualidad de los `schedule`:
-cuando hay carga puede pasar de 15 a 20 minutos. Para el mercado de fantasy da
-igual, pero que no te extrañe.
+cuando hay carga, los 15 minutos pueden ser 20.
 
 **Se apaga solo a los 60 días.** GitHub desactiva los workflows programados en
 repos sin actividad durante dos meses. Te avisa por correo y se reactiva con un
 clic.
 
-**Tu contraseña está en GitHub.** Cifrada, en tu propia cuenta, y no aparece en
-los logs. Aun así es tu contraseña en un tercero: si no te convence, borra los
-secretos y quédate con el servidor local.
+**Tu contraseña de LaLiga está en GitHub.** Cifrada, en tu cuenta, y no aparece
+en los logs. Si deja de convencerte, borra los secretos en *Settings → Secrets
+and variables → Actions* y el robot se para.
 
 ## Si algo falla
 
-En **Actions** verás la ejecución en rojo. El paso que suele fallar es el
-primero, *Iniciar sesión en LaLiga*: casi siempre es que el email o la
-contraseña no son correctos, o que tu cuenta entra con Google/Apple/Facebook y
-no tiene contraseña propia. En ese caso créala desde la app de LaLiga.
+En [Actions](https://github.com/Oscarhp19/FantasyClaude/actions) verás la
+ejecución en rojo. Si cambias la contraseña de LaLiga, vuelve a lanzar
+`configurar_github.py`: actualiza los secretos y mantiene la URL.
