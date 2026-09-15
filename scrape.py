@@ -99,6 +99,8 @@ def parse_mercado(html):
                 "equipo": eq.group(1).strip() if eq else "",
                 "valor": num(d.get("valor")),
                 "var": {k: num(d.get(f"diferencia-pct{k}")) for k in ("1", "3", "7", "14", "30")},
+                # Lo mismo en euros: es la cifra que FutbolFantasy destaca como "subida hoy".
+                "dif": {k: num(d.get(f"diferencia{k}")) for k in ("1", "3", "7", "14", "30")},
                 "tendencia": num(d.get("tendencia")),
                 "aceleracion": num(d.get("aceleracion")),
                 "jornada": int(rival.group(1)) if rival else None,

@@ -294,6 +294,10 @@ def main():
                 "lo_vende": duenos.get(str(e["playerMaster"]["id"]))
                 if e.get("discr") == "marketPlayerTeam"
                 else None,
+                "vendedor_tipo": "manager" if e.get("discr") == "marketPlayerTeam" else "liga",
+                "vendedor": (duenos.get(str(e["playerMaster"]["id"])) or "Mánager")
+                if e.get("discr") == "marketPlayerTeam"
+                else "LaLiga",
             }
             for e in mercado
         ],

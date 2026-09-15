@@ -131,7 +131,12 @@ def evalua(m, j, mi_dinero, mis_posiciones):
         "pujas": m.get("pujas"),
         "caduca": m.get("caduca"),
         "lo_vende": m.get("lo_vende"),
+        # Los liga.json anteriores no traen vendedor_tipo: se deduce de lo_vende.
+        "vendedor_tipo": m.get("vendedor_tipo") or ("manager" if m.get("lo_vende") else "liga"),
+        "vendedor": m.get("vendedor") or m.get("lo_vende") or "LaLiga",
         "probabilidad": prob,
+        "var_1d": j["var"].get("1") if j else None,
+        "dif_1d": (j.get("dif") or {}).get("1") if j else None,
         "var_7d": j["var"].get("7") if j else None,
         "var_30d": j["var"].get("30") if j else None,
         "tendencia": tend,
@@ -353,7 +358,8 @@ def main():
     if FF.exists():
         ff_doc = json.loads(FF.read_text(encoding="utf-8"))
         edad = datetime.now() - datetime.fromisoformat(ff_doc["actualizado"])
-        refrescar = edad > timedelta(hours=12)
+        # Con 12 h la "subida de hoy" podia ser la de ayer. Es una sola peticion por hora.
+        refrescar = edad > timedelta(hours=1)
     if refrescar:
         print("Refrescando FutbolFantasy...", file=sys.stderr)
         jug = scrape.parse_mercado(scrape.get(scrape.MERCADO))

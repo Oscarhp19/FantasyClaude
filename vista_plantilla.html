@@ -35,41 +35,94 @@
   }
 
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{
     background:var(--ground); color:var(--ink);
     font-family:var(--body); font-size:15px; line-height:1.55;
     padding-inline:20px; padding-block:0 56px;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1080px; margin-inline:auto; display:flex; flex-direction:column; gap:34px}
+  .wrap{max-width:1080px; margin-inline:auto; display:flex; flex-direction:column}
   h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; letter-spacing:.01em}
   .num{font-family:var(--mono); font-variant-numeric:tabular-nums}
   .eyebrow{
     font-family:var(--display); text-transform:uppercase; letter-spacing:.13em;
-    font-size:11.5px; font-weight:600; color:var(--muted);
+    font-size:11.5px; font-weight:600; color:var(--muted); margin:0;
   }
   a{color:var(--accent)}
   :focus-visible{outline:2.5px solid var(--accent); outline-offset:2px; border-radius:3px}
 
   /* ---------- cabecera ---------- */
-  header{
-    border-bottom:2px solid var(--ink); padding-block:26px 18px;
-    display:flex; flex-wrap:wrap; gap:22px 34px; align-items:flex-end;
+  .top{
+    border-bottom:2px solid var(--ink); padding-block:24px 16px;
+    display:flex; flex-wrap:wrap; gap:18px 34px; align-items:flex-end;
   }
-  header .id{flex:1 1 240px}
-  header h1{font-size:clamp(28px,4.4vw,42px); font-weight:700; line-height:1.02}
-  header .sub{color:var(--muted); font-size:14px; margin-top:5px}
-  .cifras{display:flex; gap:30px; flex-wrap:wrap}
+  .top .id{flex:1 1 240px}
+  .top h1{font-size:clamp(28px,4.4vw,40px); font-weight:700; line-height:1.02}
+  .top .sub{color:var(--muted); font-size:14px; margin:5px 0 0}
+  .cifras{display:flex; gap:30px; flex-wrap:wrap; align-items:flex-end}
   .cifra{display:flex; flex-direction:column; gap:2px}
   .cifra .v{font-family:var(--mono); font-variant-numeric:tabular-nums;
     font-size:23px; font-weight:700; line-height:1.1}
   .cifra.destacada .v{color:var(--accent); font-size:28px}
 
-  /* ---------- secciones ---------- */
+  /* ---------- menu ----------
+     Arriba en escritorio; en movil baja a una barra fija al alcance del pulgar. */
+  .menu{
+    position:sticky; top:0; z-index:20; background:var(--ground);
+    display:flex; gap:2px; border-bottom:1px solid var(--line);
+    margin-block:0 26px; overflow-x:auto; scrollbar-width:none;
+  }
+  .menu::-webkit-scrollbar{display:none}
+  .tab{
+    appearance:none; background:none; border:none; cursor:pointer;
+    font-family:var(--display); font-weight:700; text-transform:uppercase;
+    letter-spacing:.08em; font-size:13.5px; color:var(--muted);
+    padding:13px 13px 10px; border-bottom:3px solid transparent; margin-bottom:-1px;
+    display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--ink)}
+  .badge{
+    font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:0;
+    min-width:19px; height:19px; padding:0 5px; border-radius:10px;
+    background:var(--surface-2); color:var(--ink-2);
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .badge.alerta{background:var(--accent); color:var(--surface)}
+
+  .panel{display:flex; flex-direction:column; gap:34px}
   section{display:flex; flex-direction:column; gap:14px}
   .cab{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap}
   .cab h2{font-size:20px; font-weight:700}
   .cab p{margin:0; color:var(--muted); font-size:13.5px; max-width:62ch}
+
+  /* ---------- resumen ---------- */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px}
+  .tile{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:15px 16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .tile.urgente{border-left:4px solid var(--accent)}
+  .tile-cab{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .tile-cab h3{font-size:15.5px; font-weight:700}
+  .tile-dato{margin:0; color:var(--ink-2); font-size:14px}
+  .mini{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+  .mini li{display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    padding:7px 0; border-top:1px solid var(--line)}
+  .mini .qn{display:flex; flex-direction:column; min-width:0}
+  .mini .qn b{font-weight:600}
+  .mini .qn small{color:var(--muted); font-size:12px}
+  .mini .cf{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px;
+    text-align:right; white-space:nowrap}
+  .ir{
+    align-self:flex-start; appearance:none; background:none; border:none; padding:4px 0;
+    font-family:var(--display); font-weight:700; font-size:13px; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--ink); cursor:pointer;
+    text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1.5px;
+  }
+  .ir:hover{color:var(--accent)}
+  .stats{display:flex; flex-wrap:wrap; gap:14px 34px; padding-bottom:4px}
 
   /* ---------- alerta de clausulas ---------- */
   .alerta{
@@ -92,6 +145,7 @@
   }
 
   /* ---------- filtros ---------- */
+  .controles{display:flex; flex-direction:column; gap:10px}
   .filtros{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
   .chip{
     font-family:var(--display); font-size:13px; font-weight:600; letter-spacing:.03em;
@@ -100,21 +154,34 @@
   }
   .chip[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
   .chip:hover{border-color:var(--muted)}
+  .selects{display:flex; gap:10px 18px; flex-wrap:wrap}
+  .campo-sel{display:flex; align-items:center; gap:8px}
+  .campo-sel label{font-family:var(--display); font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.09em; color:var(--muted)}
+  select{
+    font:inherit; font-size:14px; color:var(--ink); background:var(--surface);
+    border:1.5px solid var(--line); border-radius:var(--r); padding:6px 30px 6px 10px;
+    appearance:none; cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),
+                     linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+    background-position:calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+    background-size:5px 5px; background-repeat:no-repeat;
+  }
 
-  /* ---------- tabla de mercado ---------- */
+  /* ---------- tablas ---------- */
   .tabla-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r);
     background:var(--surface)}
   table{border-collapse:collapse; width:100%; min-width:760px}
+  table.ancha{min-width:900px}
   caption{text-align:left; padding:10px 14px; color:var(--muted); font-size:13px;
     border-bottom:1px solid var(--line)}
   th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line); font-size:14px}
   thead th{
     font-family:var(--display); text-transform:uppercase; letter-spacing:.09em;
-    font-size:11px; font-weight:600; color:var(--muted);
-    position:sticky; top:0; background:var(--surface); z-index:1;
+    font-size:11px; font-weight:600; color:var(--muted); background:var(--surface);
   }
   td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px}
-  tbody tr:last-child td{border-bottom:none}
+  tbody tr:last-child td, tbody tr:last-child th{border-bottom:none}
   tbody tr.no-cabe{opacity:.62}
   .jug{display:flex; flex-direction:column}
   .jug .n2{font-weight:600}
@@ -139,6 +206,11 @@
   .aviso{font-size:11px; padding:1px 6px; border-radius:3px;
     background:var(--surface-2); color:var(--ink-2); white-space:nowrap}
   .aviso.dinero{background:var(--accent-soft); color:var(--accent); font-weight:600}
+  .vend{font-size:11px; padding:0 6px; border-radius:3px; border:1px solid var(--line);
+    color:var(--ink-2); white-space:nowrap; background:var(--surface)}
+  .vend.tuyo{border-color:var(--ink); color:var(--ink); font-weight:600}
+  .hoy-v{display:flex; flex-direction:column; align-items:flex-end; line-height:1.3}
+  .hoy-v .p{font-size:11.5px}
 
   /* ---------- liga ---------- */
   .barra{height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; min-width:80px}
@@ -152,7 +224,7 @@
   .nota h3{font-size:13.5px; font-weight:700; margin-bottom:4px}
   .nota p{margin:0; font-size:13px; color:var(--muted)}
 
-  .vacio{padding:26px 14px; text-align:center; color:var(--muted); font-size:14px}
+  .vacio{padding:26px 14px; text-align:center; color:var(--muted); font-size:14px; margin:0}
 
   /* ---------- once ---------- */
   .once{display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:18px; align-items:start}
@@ -161,7 +233,7 @@
     background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
     padding:16px 14px;
   }
-  /* Una separacion por linea real del equipo, no una retícula decorativa */
+  /* Una separacion por linea real del equipo, no una reticula decorativa */
   .linea{display:flex; flex-direction:column; gap:7px; padding-bottom:12px;
     border-bottom:1px solid var(--line)}
   .linea:last-child{padding-bottom:0; border-bottom:none}
@@ -205,47 +277,74 @@
   .bloqueada{background:var(--off-soft); color:var(--off)}
   @media (max-width:760px){ .once{grid-template-columns:1fr} }
 
-  /* ---------- movil: las tablas pasan a fichas ----------
-     A partir de aqui cada fila es una tarjeta con etiqueta y valor. Se cambia
+  /* ---------- movil ----------
+     Menu abajo, y las tablas pasan a fichas con etiqueta y valor. Se cambia
      display, asi que los roles ARIA van explicitos en el marcado para que la
      tabla siga anunciandose como tabla. */
   @media (max-width:720px){
-    body{font-size:15.5px; padding-inline:14px; padding-block:0 40px}
-    .wrap{gap:26px}
+    body{font-size:15.5px; padding-inline:14px;
+      padding-block:0 calc(84px + env(safe-area-inset-bottom))}
+
+    .menu{
+      position:fixed; top:auto; left:0; right:0; bottom:0; margin:0;
+      display:grid; grid-template-columns:repeat(5,1fr); gap:0;
+      background:var(--surface); border-bottom:none; border-top:1px solid var(--line);
+      padding-bottom:env(safe-area-inset-bottom); overflow:visible;
+    }
+    .tab{
+      display:grid; grid-template-rows:19px auto; justify-items:center; align-items:center;
+      row-gap:3px; padding:7px 2px 9px; min-height:58px; font-size:11px; letter-spacing:.04em;
+      border-bottom:none; border-top:3px solid transparent; margin:0;
+    }
+    .tab[aria-selected="true"]{border-top-color:var(--ink)}
+    .tab .badge{grid-row:1; height:17px; min-width:17px; font-size:10px}
+    .tab .lbl{grid-row:2}
+    .panel{padding-top:18px; gap:28px}
 
     .tabla-scroll{overflow-x:visible; border:none; background:none; border-radius:0}
-    table{min-width:0; width:100%}
+    table, table.ancha{min-width:0; width:100%}
     caption{padding:0 0 10px; border:none}
     thead{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)}
+    .wrap{overflow-x:clip}  /* clip y no hidden: hidden rompe el sticky */
+    .top .id, .cifra{min-width:0}
     tbody{display:flex; flex-direction:column; gap:10px}
+    /* Ficha compacta, dos datos por fila. Con uno por linea cada jugador
+       ocupaba media pantalla y 44 jugadores eran scroll sin fin. */
     tr{
-      display:block; background:var(--surface);
-      border:1px solid var(--line); border-radius:var(--r); padding:12px 13px;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 14px;
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+      padding:12px 13px;
     }
     tr.yo{border-color:var(--accent); border-width:1.5px}
-    th[scope="row"]{display:block; border:none; padding:0 0 9px}
+    th[scope="row"]{grid-column:1/-1; order:-1; display:block; border:none; padding:0}
     td{
-      display:flex; align-items:baseline; justify-content:space-between; gap:14px;
-      border:none; padding:4px 0; text-align:right;
+      display:flex; flex-direction:column; align-items:flex-start; gap:1px;
+      border:none; padding:0; text-align:left; min-width:0;
     }
+    td.n{text-align:left; font-size:13.5px}
     td::before{
-      content:attr(data-col); text-align:left; flex:0 0 auto;
+      content:attr(data-col);
       font-family:var(--display); text-transform:uppercase; letter-spacing:.08em;
       font-size:10.5px; font-weight:600; color:var(--muted);
     }
     td:empty{display:none}
-    td .barra{flex:1 1 auto; max-width:60%}
+    td[data-col="Capacidad"]{grid-column:1/-1}
+    td .barra{width:100%; max-width:none; min-width:0}
+    .hoy-v{flex-direction:row; flex-wrap:wrap; gap:0 8px; align-items:baseline}
 
     /* dedo, no raton: objetivos de toque comodos */
     .chip{padding:10px 16px; font-size:14px}
     .boton{padding:11px 20px; font-size:15px}
-    .filtros{gap:7px}
+    select{padding:10px 32px 10px 12px; font-size:15px; width:100%}
+    .campo-sel{flex:1 1 100%; flex-direction:column; align-items:stretch; gap:4px}
+    .ir{padding:8px 0}
 
-    header{padding-block:18px 14px; gap:16px 22px}
-    header h1{font-size:27px}
-    .cifras{gap:16px 26px; width:100%}
+    .top{padding-block:18px 14px; gap:14px 22px}
+    .top h1{font-size:27px}
+    .cifras{gap:14px 26px; width:100%}
     .cifra .v{font-size:20px} .cifra.destacada .v{font-size:26px}
     .cab h2{font-size:18.5px}
+    .tiles{grid-template-columns:1fr}
 
     .riesgo{grid-template-columns:1fr auto; gap:3px 12px}
     .alerta{padding:14px 15px}
@@ -254,7 +353,8 @@
   }
   @media (max-width:400px){
     .hueco{flex:1 1 100%}
-    header h1{font-size:24px}
+    .top h1{font-size:24px}
+    .tab{font-size:10.5px; letter-spacing:.02em}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
@@ -262,7 +362,7 @@
 <script id="datos" type="application/json">__DATOS__</script>
 
 <div class="wrap">
-  <header>
+  <header class="top">
     <div class="id">
       <p class="eyebrow" id="eyebrow-liga">Mercado diario</p>
       <h1 id="h-liga">—</h1>
@@ -280,424 +380,655 @@
           <span class="estado-txt" id="estado-txt" role="status" aria-live="polite"></span>
         </span>
       </div>
-      <div class="cifra">
-        <span class="eyebrow">Tu plantilla</span>
-        <span class="v" id="c-plantilla">—</span>
-      </div>
-      <div class="cifra">
-        <span class="eyebrow">Prima media liga</span>
-        <span class="v" id="c-prima">—</span>
-      </div>
     </div>
   </header>
 
-  <section id="sec-alerta" hidden>
-    <div class="cab">
-      <h2>Cláusulas a tiro</h2>
-      <p>Tus jugadores sin escudo cuya cláusula entra en el saldo de algún rival. Ordenados por margen: los de arriba te los quitan casi por lo que valen.</p>
-    </div>
-    <div class="alerta">
-      <p id="alerta-resumen"></p>
-      <div class="riesgos" id="riesgos"></div>
-    </div>
-  </section>
+  <nav class="menu" role="tablist" aria-label="Secciones del panel">
+    <button class="tab" type="button" role="tab" id="tab-resumen" data-tab="resumen" aria-controls="panel-resumen" aria-selected="true">
+      <span class="badge" hidden></span><span class="lbl">Resumen</span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-mercado" data-tab="mercado" aria-controls="panel-mercado" aria-selected="false" tabindex="-1">
+      <span class="badge" id="badge-mercado" hidden></span><span class="lbl">Mercado</span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-equipo" data-tab="equipo" aria-controls="panel-equipo" aria-selected="false" tabindex="-1">
+      <span class="badge" id="badge-equipo" hidden></span><span class="lbl">Equipo</span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-clausulas" data-tab="clausulas" aria-controls="panel-clausulas" aria-selected="false" tabindex="-1">
+      <span class="badge alerta" id="badge-clausulas" hidden></span><span class="lbl">Cláusulas</span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-liga" data-tab="liga" aria-controls="panel-liga" aria-selected="false" tabindex="-1">
+      <span class="badge" hidden></span><span class="lbl">Liga</span>
+    </button>
+  </nav>
 
-  <section id="sec-golpes" hidden>
-    <div class="cab">
-      <h2>Clausulazos a tu alcance</h2>
-      <p id="golpes-sub"></p>
+  <!-- ==================== RESUMEN ==================== -->
+  <div class="panel" role="tabpanel" id="panel-resumen" aria-labelledby="tab-resumen" tabindex="0">
+    <div class="stats">
+      <div class="cifra"><span class="eyebrow">Tu plantilla</span><span class="v" id="r-plantilla">—</span></div>
+      <div class="cifra"><span class="eyebrow">Prima media en la liga</span><span class="v" id="r-prima">—</span></div>
+      <div class="cifra"><span class="eyebrow">Once óptimo</span><span class="v" id="r-once">—</span></div>
     </div>
-    <div class="tabla-scroll">
-      <table role="table">
-        <thead role="rowgroup">
-          <tr>
-            <th scope="col">Jugador</th>
-            <th scope="col">Se lo quitas a</th>
-            <th scope="col" class="n">Cláusula</th>
-            <th scope="col" class="n">Sobre valor</th>
-            <th scope="col" class="n">Esper.</th>
-            <th scope="col" class="n">Te queda</th>
-            <th scope="col">Cuándo</th>
-          </tr>
-        </thead>
-        <tbody role="rowgroup" id="filas-golpes"></tbody>
-      </table>
-    </div>
-  </section>
+    <div class="tiles" id="tiles"></div>
+  </div>
 
-  <section id="sec-once">
-    <div class="cab">
-      <h2>Once con más puntos esperados</h2>
-      <p id="once-sub"></p>
-    </div>
-    <div class="once">
-      <div class="campo" id="campo"></div>
-      <div class="banca">
-        <p class="eyebrow">Fuera del once</p>
-        <ul class="lista-banca" id="banca"></ul>
+  <!-- ==================== MERCADO ==================== -->
+  <div class="panel" role="tabpanel" id="panel-mercado" aria-labelledby="tab-mercado" tabindex="0" hidden>
+    <section>
+      <div class="cab">
+        <h2>Mercado de hoy</h2>
+        <p id="mercado-sub"></p>
       </div>
-    </div>
-  </section>
+      <div class="controles">
+        <div class="filtros" role="group" aria-label="Filtrar por veredicto">
+          <button class="chip" type="button" id="f-todos" data-filtro="todos" aria-pressed="true">Todos</button>
+          <button class="chip" type="button" id="f-comprar" data-filtro="COMPRAR" aria-pressed="false">Comprar</button>
+          <button class="chip" type="button" id="f-esperar" data-filtro="ESPERAR" aria-pressed="false">Esperar</button>
+          <button class="chip" type="button" id="f-descartados" data-filtro="NO COMPRAR" aria-pressed="false">Descartados</button>
+          <button class="chip" type="button" id="f-cabe" data-toggle="cabe" aria-pressed="false">Solo lo que me cabe</button>
+        </div>
+        <div class="selects">
+          <div class="campo-sel">
+            <label for="f-vendedor">Vendedor</label>
+            <select id="f-vendedor"></select>
+          </div>
+          <div class="campo-sel">
+            <label for="f-orden">Ordenar</label>
+            <select id="f-orden">
+              <option value="recomendacion">Por recomendación</option>
+              <option value="sube">Más sube hoy</option>
+              <option value="baja">Más baja hoy</option>
+              <option value="puntos">Más puntos esperados</option>
+              <option value="barato">Más barato</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="tabla-scroll">
+        <table role="table" class="ancha">
+          <caption id="tabla-caption"></caption>
+          <thead role="rowgroup">
+            <tr>
+              <th scope="col">Jugador</th>
+              <th scope="col">Pos.</th>
+              <th scope="col" class="n">Valor</th>
+              <th scope="col" class="n">Piden</th>
+              <th scope="col" class="n">Hoy</th>
+              <th scope="col" class="n">7 días</th>
+              <th scope="col" class="n">Juega</th>
+              <th scope="col" class="n">Media</th>
+              <th scope="col" class="n">Esper.</th>
+              <th scope="col">Veredicto</th>
+              <th scope="col" class="n">Tu máximo</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="filas"></tbody>
+        </table>
+      </div>
+      <p class="vacio" id="vacio" hidden>Ningún jugador cumple esos filtros.</p>
+    </section>
+  </div>
 
-  <section id="sec-ofertas" hidden>
-    <div class="cab">
-      <h2>Ofertas por tus jugadores</h2>
-      <p id="ofertas-sub"></p>
-    </div>
-    <div class="tabla-scroll">
-      <table role="table">
-        <thead role="rowgroup">
-          <tr>
-            <th scope="col">Jugador</th>
-            <th scope="col" class="n">Valor</th>
-            <th scope="col" class="n">Te ofrecen</th>
-            <th scope="col" class="n">Prima</th>
-            <th scope="col">Caduca</th>
-            <th scope="col">Qué hacer</th>
-          </tr>
-        </thead>
-        <tbody role="rowgroup" id="filas-ofertas"></tbody>
-      </table>
-    </div>
-  </section>
+  <!-- ==================== EQUIPO ==================== -->
+  <div class="panel" role="tabpanel" id="panel-equipo" aria-labelledby="tab-equipo" tabindex="0" hidden>
+    <section id="sec-ofertas" hidden>
+      <div class="cab">
+        <h2>Ofertas por tus jugadores</h2>
+        <p id="ofertas-sub"></p>
+      </div>
+      <div class="tabla-scroll">
+        <table role="table">
+          <thead role="rowgroup">
+            <tr>
+              <th scope="col">Jugador</th>
+              <th scope="col" class="n">Valor</th>
+              <th scope="col" class="n">Te ofrecen</th>
+              <th scope="col" class="n">Prima</th>
+              <th scope="col">Caduca</th>
+              <th scope="col">Qué hacer</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="filas-ofertas"></tbody>
+        </table>
+      </div>
+    </section>
 
-  <section>
-    <div class="cab">
-      <h2>Tu plantilla</h2>
-      <p id="plantilla-sub"></p>
-    </div>
-    <div class="tabla-scroll">
-      <table role="table">
-        <thead role="rowgroup">
-          <tr>
-            <th scope="col">Jugador</th>
-            <th scope="col">Pos.</th>
-            <th scope="col" class="n">Valor</th>
-            <th scope="col" class="n">7 días</th>
-            <th scope="col" class="n">Juega</th>
-            <th scope="col" class="n">Media</th>
-            <th scope="col" class="n">Cláusula</th>
-            <th scope="col">Recomendación</th>
-          </tr>
-        </thead>
-        <tbody role="rowgroup" id="filas-plantilla"></tbody>
-      </table>
-    </div>
-  </section>
+    <section id="sec-once">
+      <div class="cab">
+        <h2>Once con más puntos esperados</h2>
+        <p id="once-sub"></p>
+      </div>
+      <div class="once">
+        <div class="campo" id="campo"></div>
+        <div class="banca">
+          <p class="eyebrow">Fuera del once</p>
+          <ul class="lista-banca" id="banca"></ul>
+        </div>
+      </div>
+    </section>
 
-  <section>
-    <div class="cab">
-      <h2>Mercado de hoy</h2>
-      <p id="mercado-sub"></p>
-    </div>
-    <div class="filtros" role="group" aria-label="Filtrar el mercado">
-      <button class="chip" type="button" id="f-todos" data-filtro="todos" aria-pressed="true">Todos</button>
-      <button class="chip" type="button" id="f-comprar" data-filtro="COMPRAR" aria-pressed="false">Comprar</button>
-      <button class="chip" type="button" id="f-esperar" data-filtro="ESPERAR" aria-pressed="false">Esperar</button>
-      <button class="chip" type="button" id="f-descartados" data-filtro="NO COMPRAR" aria-pressed="false">Descartados</button>
-      <button class="chip" type="button" id="f-cabe" data-toggle="cabe" aria-pressed="false">Solo lo que me cabe</button>
-    </div>
-    <div class="tabla-scroll">
-      <table role="table">
-        <caption id="tabla-caption"></caption>
-        <thead role="rowgroup">
-          <tr>
-            <th scope="col">Jugador</th>
-            <th scope="col">Pos.</th>
-            <th scope="col" class="n">Valor</th>
-            <th scope="col" class="n">Piden</th>
-            <th scope="col" class="n">7 días</th>
-            <th scope="col" class="n">Juega</th>
-            <th scope="col" class="n">Media</th>
-            <th scope="col" class="n">Esper.</th>
-            <th scope="col">Veredicto</th>
-            <th scope="col" class="n">Tu máximo</th>
-          </tr>
-        </thead>
-        <tbody role="rowgroup" id="filas"></tbody>
-      </table>
-    </div>
-    <p class="vacio" id="vacio" hidden>Ningún jugador cumple ese filtro.</p>
-  </section>
+    <section>
+      <div class="cab">
+        <h2>Tu plantilla</h2>
+        <p id="plantilla-sub"></p>
+      </div>
+      <div class="tabla-scroll">
+        <table role="table">
+          <thead role="rowgroup">
+            <tr>
+              <th scope="col">Jugador</th>
+              <th scope="col">Pos.</th>
+              <th scope="col" class="n">Valor</th>
+              <th scope="col" class="n">7 días</th>
+              <th scope="col" class="n">Juega</th>
+              <th scope="col" class="n">Media</th>
+              <th scope="col" class="n">Cláusula</th>
+              <th scope="col">Recomendación</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="filas-plantilla"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 
-  <section>
-    <div class="cab">
-      <h2>La liga</h2>
-      <p>Saldo reconstruido desde el histórico de fichajes. El tuyo es el real; el de los demás es un mínimo.</p>
-    </div>
-    <div class="tabla-scroll">
-      <table role="table">
-        <thead role="rowgroup">
-          <tr>
-            <th scope="col" class="n">#</th>
-            <th scope="col">Mánager</th>
-            <th scope="col" class="n">Puntos</th>
-            <th scope="col" class="n">Plantilla</th>
-            <th scope="col" class="n">Saldo</th>
-            <th scope="col">Capacidad de compra</th>
-          </tr>
-        </thead>
-        <tbody role="rowgroup" id="clasificacion"></tbody>
-      </table>
-    </div>
-  </section>
+  <!-- ==================== CLAUSULAS ==================== -->
+  <div class="panel" role="tabpanel" id="panel-clausulas" aria-labelledby="tab-clausulas" tabindex="0" hidden>
+    <section>
+      <div class="cab">
+        <h2>Te pueden quitar</h2>
+        <p>Tus jugadores sin escudo cuya cláusula entra en el saldo de algún rival. Los de arriba te los quitan casi por lo que valen.</p>
+      </div>
+      <div class="alerta" id="sec-alerta" hidden>
+        <p id="alerta-resumen"></p>
+        <div class="riesgos" id="riesgos"></div>
+      </div>
+      <p class="vacio" id="alerta-vacia" hidden>Ningún rival tiene dinero para pagar la cláusula de tus jugadores.</p>
+    </section>
 
-  <section class="notas" aria-label="Cómo se calcula">
-    <div class="nota">
-      <h3>Tu máximo</h3>
-      <p>Prima solo a quien sube: +15% si sube sostenido, +10% si gira al alza, −5% si cae frenando, −10% si cae acelerando. Cero si no va a jugar o no puntúa.</p>
-    </div>
-    <div class="nota">
-      <h3>Puntos esperados</h3>
-      <p>Media cuando juega × probabilidad de alineación. Sin probabilidad publicada no se calcula, y la fila se marca como tal en vez de inventarla.</p>
-    </div>
-    <div class="nota">
-      <h3>Saldo de los rivales</h3>
-      <p id="nota-saldo">El histórico no registra las recompensas, así que las cajas salen cortas. Se mide el desvío con tu dinero real y se suma a todos.</p>
-    </div>
-    <div class="nota">
-      <h3>De dónde sale</h3>
-      <p id="nota-fuentes">Valor, media y estado, de la API oficial de LaLiga Fantasy. Tendencia de precio y probabilidad de jugar, de FútbolFantasy.</p>
-    </div>
-  </section>
+    <section>
+      <div class="cab">
+        <h2>Puedes quitar</h2>
+        <p id="golpes-sub"></p>
+      </div>
+      <div class="tabla-scroll" id="sec-golpes" hidden>
+        <table role="table">
+          <thead role="rowgroup">
+            <tr>
+              <th scope="col">Jugador</th>
+              <th scope="col">Se lo quitas a</th>
+              <th scope="col" class="n">Cláusula</th>
+              <th scope="col" class="n">Sobre valor</th>
+              <th scope="col" class="n">Esper.</th>
+              <th scope="col" class="n">Te queda</th>
+              <th scope="col">Cuándo</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="filas-golpes"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== LIGA ==================== -->
+  <div class="panel" role="tabpanel" id="panel-liga" aria-labelledby="tab-liga" tabindex="0" hidden>
+    <section>
+      <div class="cab">
+        <h2>Clasificación y caja</h2>
+        <p>Saldo reconstruido desde el histórico de fichajes. El tuyo es el real; el de los demás es un mínimo.</p>
+      </div>
+      <div class="tabla-scroll">
+        <table role="table">
+          <thead role="rowgroup">
+            <tr>
+              <th scope="col" class="n">#</th>
+              <th scope="col">Mánager</th>
+              <th scope="col" class="n">Puntos</th>
+              <th scope="col" class="n">Plantilla</th>
+              <th scope="col" class="n">Saldo</th>
+              <th scope="col">Capacidad de compra</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="clasificacion"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="cab"><h2>Cómo se calcula</h2></div>
+      <div class="notas">
+        <div class="nota">
+          <h3>Tu máximo</h3>
+          <p>Prima solo a quien sube: +15% si sube sostenido, +10% si gira al alza, −5% si cae frenando, −10% si cae acelerando. Cero si no va a jugar o no puntúa.</p>
+        </div>
+        <div class="nota">
+          <h3>Puntos esperados</h3>
+          <p>Media cuando juega × probabilidad de alineación. Sin probabilidad publicada no se calcula, y la fila se marca como tal en vez de inventarla.</p>
+        </div>
+        <div class="nota">
+          <h3>Subida de hoy</h3>
+          <p>Variación del valor de mercado en las últimas 24 horas, en euros y en porcentaje, tal como la publica FútbolFantasy.</p>
+        </div>
+        <div class="nota">
+          <h3>Saldo de los rivales</h3>
+          <p>El histórico no registra las recompensas, así que las cajas salen cortas. Se mide el desvío con tu dinero real y se suma a todos.</p>
+        </div>
+        <div class="nota">
+          <h3>De dónde sale</h3>
+          <p id="nota-fuentes">Valor, media, estado, ofertas y vendedor, de la API oficial de LaLiga Fantasy. Tendencia, subida diaria y probabilidad de jugar, de FútbolFantasy.</p>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <script>
 (function(){
   const D = JSON.parse(document.getElementById('datos').textContent);
-  const eur = n => (n||n===0) ? Math.round(n).toLocaleString('es-ES') + ' €' : '—';
-  const pct = n => (n===null||n===undefined) ? '—' : (n>0?'+':'') + n.toFixed(1) + '%';
-  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const MENOS = '−';
+  const es = (n, dec) => Math.abs(n).toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  const signo = n => n > 0 ? '+' : n < 0 ? MENOS : '';
+  const eur = n => (n || n === 0) ? Math.round(n).toLocaleString('es-ES') + ' €' : '—';
+  const eurS = n => (n == null) ? '—' : signo(n) + es(Math.round(n), 0) + ' €';
+  const pct = n => (n == null) ? '—' : signo(n) + es(n, 1) + '%';
+  const pct2 = n => (n == null) ? '—' : signo(n) + es(n, 2) + '%';
+  const clsVar = n => n > 0 ? 'sube' : n < 0 ? 'baja' : '';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fechaCorta = iso => new Date(iso).toLocaleString('es-ES', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  const $ = id => document.getElementById(id);
+  const badge = (id, n, texto) => {
+    const b = $(id); if (!b) return;
+    b.hidden = !n; b.textContent = n || '';
+    if (n) b.setAttribute('aria-label', texto); else b.removeAttribute('aria-label');
+  };
 
-  // cabecera
-  document.getElementById('h-liga').textContent = D.liga.nombre;
+  const M = D.mercado || [];
+  const P = D.mi_plantilla || [];
+  const AL = D.alertas_clausula || [];
+  const G = D.clausulazos || [];
+  const O = D.once_optimo;
+  const yo = D.yo.manager;
   const mio = D.equipos.find(e => e.team_id === D.yo.team_id) || {};
-  document.getElementById('h-sub').textContent =
-    `${D.yo.manager} · ${mio.posicion}.º de ${D.liga.managers} · ${mio.puntos} puntos`;
-  const f = new Date(D.generado);
-  document.getElementById('eyebrow-liga').textContent =
-    'Mercado del ' + f.toLocaleDateString('es-ES',{day:'numeric',month:'long'}) +
-    ', ' + f.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('c-dinero').textContent = eur(D.yo.dinero);
-  document.getElementById('c-plantilla').textContent = eur(D.yo.valor_plantilla);
-  document.getElementById('c-prima').textContent =
-    D.prima_media_liga_pct==null ? '—' : pct(D.prima_media_liga_pct);
 
-  // clausulas
-  const al = D.alertas_clausula || [];
-  if (al.length){
-    document.getElementById('sec-alerta').hidden = false;
-    const baratas = al.filter(a => a.margen_pct !== null && a.margen_pct <= 20).length;
-    document.getElementById('alerta-resumen').textContent =
-      `${al.length} de tus jugadores tienen la cláusula al alcance de alguien` +
-      (baratas ? `, y ${baratas} a menos de un 20% sobre su valor.` : '.');
-    document.getElementById('riesgos').innerHTML = al.slice(0,8).map(a => `
-      <div class="riesgo">
-        <span class="nom">${esc(a.jugador)}</span>
-        <span class="num">${eur(a.clausula)}</span>
-        <span class="margen">${a.margen_pct===null?'—':pct(a.margen_pct)}</span>
-        <span class="quien">Pueden pagarla: ${esc(a.pueden_pagarla.join(', '))}</span>
-      </div>`).join('');
+  // ---------------- cabecera ----------------
+  $('h-liga').textContent = D.liga.nombre;
+  $('h-sub').textContent = `${yo} · ${mio.posicion}.º de ${D.liga.managers} · ${mio.puntos} puntos`;
+  const f = new Date(D.generado);
+  $('eyebrow-liga').textContent = 'Datos del ' +
+    f.toLocaleDateString('es-ES', {day:'numeric', month:'long'}) + ', ' +
+    f.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  $('c-dinero').textContent = eur(D.yo.dinero);
+
+  // ---------------- resumen ----------------
+  $('r-plantilla').textContent = eur(D.yo.valor_plantilla);
+  $('r-prima').textContent = D.prima_media_liga_pct == null ? '—' : pct(D.prima_media_liga_pct);
+  $('r-once').textContent = O ? `${O.formacion} · ${O.total.toLocaleString('es-ES')} pts` : '—';
+
+  const conOferta = P.filter(p => p.mejor_oferta);
+  const aceptables = conOferta.filter(p => p.accion === 'ACEPTAR OFERTA' || (p.accion === 'VENDER' && !p.oferta_baja));
+  const comprasCaben = M.filter(r => r.veredicto === 'COMPRAR' && r.te_cabe);
+  const subidas = M.filter(r => r.dif_1d > 0).sort((a, b) => b.dif_1d - a.dif_1d);
+
+  const vend = r => r.vendedor_tipo === 'liga' ? 'LaLiga' : (r.vendedor === yo ? 'tuyo' : r.vendedor);
+  const tiles = [];
+
+  if (conOferta.length){
+    const caduca = conOferta.map(p => p.ofertas[0] && p.ofertas[0].caduca).filter(Boolean).sort()[0];
+    tiles.push(`<article class="tile">
+      <div class="tile-cab"><h3>Ofertas por tus jugadores</h3><span class="badge">${conOferta.length}</span></div>
+      <p class="tile-dato">${aceptables.length ? `${aceptables.length} merece${aceptables.length>1?'n':''} la pena aceptar` : 'Ninguna merece la pena ahora mismo'}${caduca ? `. Caducan el ${fechaCorta(caduca)}.` : '.'}</p>
+      <ul class="mini">${(aceptables.length ? aceptables : conOferta).slice(0,3).map(p => `
+        <li><span class="qn"><b>${esc(p.nombre)}</b><small>vale ${eur(p.valor)}</small></span>
+        <span class="cf ${clsVar(p.prima_oferta_pct)}">${eur(p.mejor_oferta)}<br>${pct(p.prima_oferta_pct)}</span></li>`).join('')}</ul>
+      <button class="ir" type="button" data-ir="equipo" data-sec="sec-ofertas">Ver ofertas</button>
+    </article>`);
   }
 
-  // clausulazos
-  const G = D.clausulazos || [];
+  tiles.push(`<article class="tile">
+    <div class="tile-cab"><h3>Compras que te caben</h3><span class="badge">${comprasCaben.length}</span></div>
+    <p class="tile-dato">${comprasCaben.length ? 'Pasan el corte y entran en tu presupuesto.' : 'Nada de lo que pasa el corte entra hoy en tu presupuesto.'}</p>
+    ${comprasCaben.length ? `<ul class="mini">${comprasCaben.slice(0,3).map(r => `
+      <li><span class="qn"><b>${esc(r.nombre)}</b><small>${esc(r.posicion||'')} · vende ${esc(vend(r))}</small></span>
+      <span class="cf">hasta ${eur(r.precio_max)}<br><span class="${clsVar(r.var_1d)}">hoy ${pct2(r.var_1d)}</span></span></li>`).join('')}</ul>` : ''}
+    <button class="ir" type="button" data-ir="mercado">Ir al mercado</button>
+  </article>`);
+
+  if (subidas.length){
+    tiles.push(`<article class="tile">
+      <div class="tile-cab"><h3>Más suben hoy en tu mercado</h3></div>
+      <ul class="mini">${subidas.slice(0,4).map(r => `
+        <li><span class="qn"><b>${esc(r.nombre)}</b><small>vende ${esc(vend(r))}</small></span>
+        <span class="cf sube">${eurS(r.dif_1d)}<br>${pct2(r.var_1d)}</span></li>`).join('')}</ul>
+      <button class="ir" type="button" data-ir="mercado" data-orden="sube">Ver por subida</button>
+    </article>`);
+  }
+
+  if (AL.length){
+    const baratas = AL.filter(a => a.margen_pct !== null && a.margen_pct <= 20).length;
+    tiles.push(`<article class="tile urgente">
+      <div class="tile-cab"><h3>Te pueden quitar</h3><span class="badge alerta">${AL.length}</span></div>
+      <p class="tile-dato">${AL.length} jugadores tuyos con la cláusula al alcance de un rival${baratas ? `; ${baratas} a menos de un 20% sobre su valor` : ''}.</p>
+      <ul class="mini">${AL.slice(0,3).map(a => `
+        <li><span class="qn"><b>${esc(a.jugador)}</b><small>pueden: ${esc(a.pueden_pagarla.slice(0,2).join(', '))}${a.pueden_pagarla.length>2?'…':''}</small></span>
+        <span class="cf">${eur(a.clausula)}<br><span class="baja">${pct(a.margen_pct)}</span></span></li>`).join('')}</ul>
+      <button class="ir" type="button" data-ir="clausulas">Ver cláusulas</button>
+    </article>`);
+  }
+
   if (G.length){
-    document.getElementById('sec-golpes').hidden = false;
     const libres = G.filter(c => !c.bloqueada);
-    document.getElementById('golpes-sub').textContent =
-      `${G.length} jugadores rivales cuya cláusula te cabe en la caja. ` +
-      (libres.length
-        ? `${libres.length} puedes pagarla ya.`
-        : 'Ninguna está abierta ahora mismo: la columna de la derecha dice cuándo se abre cada una.');
-    document.getElementById('filas-golpes').innerHTML = G.slice(0,15).map(c => {
-      const cuando = c.bloqueada
-        ? `<span class="pill bloqueada">${new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</span>`
-        : '<span class="pill libre">Ahora</span>';
-      const av = c.sin_probabilidad ? '<span class="aviso">sin dato de alineación</span>' : '';
-      return `<tr role="row" class="${c.bloqueada?'no-cabe':''}">
-        <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
-          <span class="n2">${esc(c.nombre)}</span>
-          <span class="m">${esc(c.posicion||'')}${c.equipo?' · '+esc(c.equipo):''} · media ${c.media_puntos}</span></span>
-          <span class="avisos">${av}</span></th>
-        <td role="cell" data-col="Se lo quitas a">${esc(c.duenio)}</td>
-        <td role="cell" data-col="Cláusula" class="n">${eur(c.clausula)}</td>
-        <td role="cell" data-col="Sobre valor" class="n ${c.sobreprecio_pct>20?'baja':''}">${pct(c.sobreprecio_pct)}</td>
-        <td role="cell" data-col="Esperados" class="n">${c.esperados.toFixed(1)}</td>
-        <td role="cell" data-col="Te queda" class="n">${eur(c.te_queda)}</td>
-        <td role="cell" data-col="Cuándo">${cuando}</td>
+    tiles.push(`<article class="tile">
+      <div class="tile-cab"><h3>Puedes quitar</h3><span class="badge">${G.length}</span></div>
+      <p class="tile-dato">${libres.length ? `${libres.length} cláusulas abiertas ahora mismo.` : 'Ninguna abierta ahora. Estas son las mejores y cuándo se abren.'}</p>
+      <ul class="mini">${G.slice(0,3).map(c => `
+        <li><span class="qn"><b>${esc(c.nombre)}</b><small>de ${esc(c.duenio)} · ${c.bloqueada ? 'abre el ' + new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'}) : 'abierta'}</small></span>
+        <span class="cf">${eur(c.clausula)}<br>${c.esperados.toLocaleString('es-ES',{maximumFractionDigits:1})} esp</span></li>`).join('')}</ul>
+      <button class="ir" type="button" data-ir="clausulas">Ver clausulazos</button>
+    </article>`);
+  }
+
+  if (O){
+    const actual = (D.yo.formacion_actual || []).join(',');
+    const igual = actual === O.formacion;
+    tiles.push(`<article class="tile">
+      <div class="tile-cab"><h3>Tu once</h3></div>
+      <p class="tile-dato">${igual ? `Juegas ${actual}, que ya es la formación con más puntos esperados.` : `Juegas ${actual || '—'}; la mejor sería ${O.formacion}.`} Capitán recomendado: <b>${esc(O.capitan)}</b>.</p>
+      <button class="ir" type="button" data-ir="equipo" data-sec="sec-once">Ver once</button>
+    </article>`);
+  }
+  $('tiles').innerHTML = tiles.join('');
+
+  // ---------------- mercado ----------------
+  const compras = M.filter(r => r.veredicto === 'COMPRAR');
+  $('mercado-sub').textContent =
+    `${M.length} jugadores: ${M.filter(r => r.vendedor_tipo === 'liga').length} de LaLiga y ` +
+    `${M.filter(r => r.vendedor_tipo === 'manager').length} de mánagers. ` +
+    `${compras.length} pasan el corte, ${comprasCaben.length} dentro de tu presupuesto.`;
+
+  // Opciones de vendedor sacadas de lo que hay hoy, con cuantos vende cada uno.
+  const porVendedor = {};
+  M.filter(r => r.vendedor_tipo === 'manager').forEach(r => { porVendedor[r.vendedor] = (porVendedor[r.vendedor] || 0) + 1; });
+  const nLiga = M.filter(r => r.vendedor_tipo === 'liga').length;
+  const nMan = M.length - nLiga;
+  $('f-vendedor').innerHTML =
+    `<option value="todos">Todos (${M.length})</option>` +
+    `<option value="liga">LaLiga, jugadores libres (${nLiga})</option>` +
+    `<option value="managers">Cualquier mánager (${nMan})</option>` +
+    Object.keys(porVendedor).sort((a, b) => (a === yo) - (b === yo) || a.localeCompare(b, 'es'))
+      .map(v => `<option value="m:${esc(v)}">${v === yo ? 'Tú, ' + esc(v) : esc(v)} (${porVendedor[v]})</option>`).join('');
+
+  const ORDENES = {
+    recomendacion: null,
+    sube:   (a, b) => (b.dif_1d ?? -Infinity) - (a.dif_1d ?? -Infinity),
+    baja:   (a, b) => (a.dif_1d ?? Infinity) - (b.dif_1d ?? Infinity),
+    puntos: (a, b) => (b.puntos_esperados ?? b.media_puntos ?? -1) - (a.puntos_esperados ?? a.media_puntos ?? -1),
+    barato: (a, b) => (a.precio_venta || 0) - (b.precio_venta || 0),
+  };
+  const TXT_ORDEN = {
+    recomendacion: 'Ordenado por veredicto y después por puntos esperados.',
+    sube: 'Ordenado por lo que más ha subido en las últimas 24 horas.',
+    baja: 'Ordenado por lo que más ha bajado en las últimas 24 horas.',
+    puntos: 'Ordenado por puntos esperados.',
+    barato: 'Ordenado de más barato a más caro.',
+  };
+
+  let filtro = 'todos', soloCabe = false, vendedor = 'todos', orden = 'recomendacion';
+  const tb = $('filas'), vacio = $('vacio');
+  const claseV = v => v === 'NO COMPRAR' ? 'v-NO' : 'v-' + v;
+
+  function pasaVendedor(r){
+    if (vendedor === 'todos') return true;
+    if (vendedor === 'liga') return r.vendedor_tipo === 'liga';
+    if (vendedor === 'managers') return r.vendedor_tipo === 'manager';
+    return r.vendedor_tipo === 'manager' && 'm:' + r.vendedor === vendedor;
+  }
+
+  function pinta(){
+    let vis = M.filter(r => (filtro === 'todos' || r.veredicto === filtro) && (!soloCabe || r.te_cabe) && pasaVendedor(r));
+    if (ORDENES[orden]) vis = vis.slice().sort(ORDENES[orden]);
+    $('tabla-caption').textContent = TXT_ORDEN[orden] + ` ${vis.length} de ${M.length}.`;
+    vacio.hidden = vis.length > 0;
+    tb.innerHTML = vis.map(r => {
+      const av = [];
+      av.push(r.vendedor_tipo === 'liga'
+        ? '<span class="vend">LaLiga</span>'
+        : r.vendedor === yo ? '<span class="vend tuyo">lo vendes tú</span>'
+        : `<span class="vend">vende ${esc(r.vendedor)}</span>`);
+      if (!r.te_cabe) av.push('<span class="aviso dinero">no te cabe</span>');
+      if (r.caro_de_salida) av.push('<span class="aviso">piden más de tu máximo</span>');
+      if (r.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
+      if (r.posicion_cubierta) av.push('<span class="aviso">posición cubierta</span>');
+      if (r.pujas) av.push(`<span class="aviso">${r.pujas} puja${r.pujas > 1 ? 's' : ''}</span>`);
+      const rival = r.rival ? `J${r.jornada} · ${esc(r.rival)}` : esc(r.razon);
+      const hoy = r.dif_1d == null ? '—'
+        : `<span class="hoy-v"><span>${eurS(r.dif_1d)}</span><span class="p">${pct2(r.var_1d)}</span></span>`;
+      return `<tr role="row" class="${r.te_cabe ? '' : 'no-cabe'}">
+        <th scope="row" role="rowheader" style="font-weight:400">
+          <span class="jug"><span class="n2">${esc(r.nombre)}</span>
+          <span class="m">${esc(r.equipo || '')}${r.equipo ? ' · ' : ''}${rival}</span></span>
+          <span class="avisos">${av.join('')}</span>
+        </th>
+        <td role="cell" data-col="Posición"><span class="pos">${esc((r.posicion || '').slice(0,3))}</span></td>
+        <td role="cell" data-col="Valor" class="n">${eur(r.valor)}</td>
+        <td role="cell" data-col="Piden" class="n">${eur(r.precio_venta)}</td>
+        <td role="cell" data-col="Hoy" class="n ${clsVar(r.dif_1d)}">${hoy}</td>
+        <td role="cell" data-col="7 días" class="n ${clsVar(r.var_7d)}">${pct(r.var_7d)}</td>
+        <td role="cell" data-col="Juega" class="n">${r.probabilidad == null ? '—' : r.probabilidad + '%'}</td>
+        <td role="cell" data-col="Media" class="n">${r.media_puntos == null ? '—' : r.media_puntos.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
+        <td role="cell" data-col="Esperados" class="n">${r.puntos_esperados == null ? '—' : r.puntos_esperados.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
+        <td role="cell" data-col="Veredicto"><span class="pill ${claseV(r.veredicto)}">${esc(r.veredicto)}</span></td>
+        <td role="cell" data-col="Tu máximo" class="n">${r.precio_max ? eur(r.precio_max) : '—'}</td>
       </tr>`;
     }).join('');
   }
 
-  // once optimo
-  const O = D.once_optimo;
-  if (O){
-    document.getElementById('once-sub').textContent =
-      `Formación ${O.formacion} · ${O.total} puntos esperados · capitán ${O.capitan}` +
-      (D.yo.formacion_actual ? ` · ahora juegas ${D.yo.formacion_actual.join(',')}.` : '.');
-    const LINEAS = [[1,'Portería'],[2,'Defensa'],[3,'Centro del campo'],[4,'Ataque'],[5,'Entrenador']];
-    document.getElementById('campo').innerHTML = LINEAS.map(([pid,tit]) => {
-      const en = O.once.filter(p => p.posicion_id === pid);
-      if (!en.length) return '';
-      return `<div class="linea"><p class="eyebrow">${tit}</p><div class="huecos">${
-        en.map(p => `<div class="hueco ${p.nombre===O.capitan?'cap':''}">
-            ${p.nombre===O.capitan?'<span class="cinta">Capitán</span>':''}
-            <span class="nm">${esc(p.nombre)}</span>
-            <span class="dt">${p.esperados.toFixed(1)} esp · ${p.probabilidad==null?'s/d':p.probabilidad+'%'}</span>
-          </div>`).join('')
-      }</div></div>`;
-    }).join('');
-    document.getElementById('banca').innerHTML = (O.banquillo||[]).map(b => `
-      <li><span>${esc(b.nombre)}</span><span class="por">${
-        b.estado && b.estado!=='ok' ? esc(b.estado)
-        : b.probabilidad===0 ? 'no juega'
-        : (b.esperados==null ? '—' : b.esperados.toFixed(1)+' esp')
-      }</span></li>`).join('') || '<li><span>Nadie: juegan los 14.</span></li>';
-  } else {
-    document.getElementById('sec-once').hidden = true;
-  }
+  document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.toggle === 'cabe'){
+      soloCabe = !soloCabe; b.setAttribute('aria-pressed', String(soloCabe));
+    } else {
+      filtro = b.dataset.filtro;
+      document.querySelectorAll('.chip[data-filtro]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    }
+    pinta();
+  }));
+  $('f-vendedor').addEventListener('change', e => { vendedor = e.target.value; pinta(); });
+  $('f-orden').addEventListener('change', e => { orden = e.target.value; pinta(); });
+  pinta();
 
-  // ofertas recibidas
-  const P = D.mi_plantilla || [];
-  const conOferta = P.filter(p => p.mejor_oferta);
+  // ---------------- equipo: ofertas ----------------
   if (conOferta.length){
-    document.getElementById('sec-ofertas').hidden = false;
+    $('sec-ofertas').hidden = false;
     const buenas = conOferta.filter(p => p.oferta_por_encima_del_mercado).length;
-    document.getElementById('ofertas-sub').textContent =
-      `${conOferta.length} ofertas pendientes` +
-      (D.prima_media_liga_pct!=null ? `. La prima media en tu liga es ${pct(D.prima_media_liga_pct)}, `
-        + `así que ${buenas>0?`${buenas} está${buenas>1?'n':''} por encima de lo normal`:'ninguna destaca'}.` : '.');
-    document.getElementById('filas-ofertas').innerHTML = conOferta.map(p => {
-      const cad = p.ofertas[0] && p.ofertas[0].caduca
-        ? new Date(p.ofertas[0].caduca).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
-        : '—';
+    $('ofertas-sub').textContent = `${conOferta.length} ofertas pendientes` +
+      (D.prima_media_liga_pct != null
+        ? `. La prima media en tu liga es ${pct(D.prima_media_liga_pct)}, así que ${buenas > 0 ? `${buenas} está${buenas > 1 ? 'n' : ''} por encima de lo normal` : 'ninguna destaca'}.`
+        : '.');
+    $('filas-ofertas').innerHTML = conOferta.map(p => {
+      const cad = p.ofertas[0] && p.ofertas[0].caduca ? fechaCorta(p.ofertas[0].caduca) : '—';
       let qh = 'Ignórala', cls = 'a-REVISAR';
-      if (p.accion === 'ACEPTAR OFERTA'){ qh = 'Acéptala'; cls='a-ACEPTAR'; }
-      else if (p.accion === 'VENDER' && !p.oferta_baja){ qh = 'Acéptala: es un descarte'; cls='a-ACEPTAR'; }
-      else if (p.accion === 'VENDER' && p.oferta_baja){ qh = 'Véndelo, pero no a este precio'; cls='a-VENDER'; }
-      else if (p.accion === 'MANTENER'){ qh = 'Ignórala'; cls='a-REVISAR'; }
+      if (p.accion === 'ACEPTAR OFERTA'){ qh = 'Acéptala'; cls = 'a-ACEPTAR'; }
+      else if (p.accion === 'VENDER' && !p.oferta_baja){ qh = 'Acéptala: es un descarte'; cls = 'a-ACEPTAR'; }
+      else if (p.accion === 'VENDER' && p.oferta_baja){ qh = 'Véndelo, pero no a este precio'; cls = 'a-VENDER'; }
       return `<tr role="row">
         <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
           <span class="n2">${esc(p.nombre)}</span>
-          <span class="m">${esc(p.posicion||'')}${p.equipo?' · '+esc(p.equipo):''}</span></span></th>
+          <span class="m">${esc(p.posicion || '')}${p.equipo ? ' · ' + esc(p.equipo) : ''}</span></span></th>
         <td role="cell" data-col="Valor" class="n">${eur(p.valor)}</td>
         <td role="cell" data-col="Te ofrecen" class="n">${eur(p.mejor_oferta)}</td>
-        <td role="cell" data-col="Prima" class="n ${p.prima_oferta_pct>0?'sube':p.prima_oferta_pct<0?'baja':''}">${pct(p.prima_oferta_pct)}</td>
+        <td role="cell" data-col="Prima" class="n ${clsVar(p.prima_oferta_pct)}">${pct(p.prima_oferta_pct)}</td>
         <td role="cell" data-col="Caduca" class="n">${cad}</td>
         <td role="cell" data-col="Qué hacer"><span class="pill ${cls}">${qh}</span></td>
       </tr>`;
     }).join('');
   }
+  badge('badge-equipo', conOferta.length, `${conOferta.length} ofertas pendientes`);
 
-  // plantilla
-  const ventas = P.filter(p => p.accion==='VENDER' || p.accion==='ACEPTAR OFERTA').length;
-  document.getElementById('plantilla-sub').textContent =
-    `${P.length} jugadores. ${ventas? `${ventas} con recomendación de venta.` : 'Ninguno para vender ahora mismo.'}`;
-  document.getElementById('filas-plantilla').innerHTML = P.map(p => {
-    const av=[];
-    if(p.escudo) av.push('<span class="aviso">con escudo</span>');
-    if(p.oferta_baja) av.push('<span class="aviso">oferta bajo su valor</span>');
-    if(p.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
-    if(p.estado && p.estado!=='ok') av.push(`<span class="aviso dinero">${esc(p.estado)}</span>`);
-    const cls = 'a-' + (p.accion==='ACEPTAR OFERTA' ? 'ACEPTAR' : p.accion);
+  // ---------------- equipo: once ----------------
+  if (O){
+    $('once-sub').textContent =
+      `Formación ${O.formacion} · ${O.total.toLocaleString('es-ES')} puntos esperados · capitán ${O.capitan}` +
+      (D.yo.formacion_actual ? ` · ahora juegas ${D.yo.formacion_actual.join(',')}.` : '.');
+    const LINEAS = [[1,'Portería'],[2,'Defensa'],[3,'Centro del campo'],[4,'Ataque'],[5,'Entrenador']];
+    $('campo').innerHTML = LINEAS.map(([pid, tit]) => {
+      const en = O.once.filter(p => p.posicion_id === pid);
+      if (!en.length) return '';
+      return `<div class="linea"><p class="eyebrow">${tit}</p><div class="huecos">${
+        en.map(p => `<div class="hueco ${p.nombre === O.capitan ? 'cap' : ''}">
+            ${p.nombre === O.capitan ? '<span class="cinta">Capitán</span>' : ''}
+            <span class="nm">${esc(p.nombre)}</span>
+            <span class="dt">${p.esperados.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})} esp · ${p.probabilidad == null ? 's/d' : p.probabilidad + '%'}</span>
+          </div>`).join('')
+      }</div></div>`;
+    }).join('');
+    $('banca').innerHTML = (O.banquillo || []).map(b => `
+      <li><span>${esc(b.nombre)}</span><span class="por">${
+        b.estado && b.estado !== 'ok' ? esc(b.estado)
+        : b.probabilidad === 0 ? 'no juega'
+        : (b.esperados == null ? '—' : b.esperados.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1}) + ' esp')
+      }</span></li>`).join('') || '<li><span>Nadie: juegan todos.</span></li>';
+  } else {
+    $('sec-once').hidden = true;
+  }
+
+  // ---------------- equipo: plantilla ----------------
+  const ventas = P.filter(p => p.accion === 'VENDER' || p.accion === 'ACEPTAR OFERTA').length;
+  $('plantilla-sub').textContent =
+    `${P.length} jugadores. ${ventas ? `${ventas} con recomendación de venta.` : 'Ninguno para vender ahora mismo.'}`;
+  $('filas-plantilla').innerHTML = P.map(p => {
+    const av = [];
+    if (p.escudo) av.push('<span class="aviso">con escudo</span>');
+    if (p.oferta_baja) av.push('<span class="aviso">oferta bajo su valor</span>');
+    if (p.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
+    if (p.estado && p.estado !== 'ok') av.push(`<span class="aviso dinero">${esc(p.estado)}</span>`);
+    const cls = 'a-' + (p.accion === 'ACEPTAR OFERTA' ? 'ACEPTAR' : p.accion);
     return `<tr role="row">
       <th scope="row" role="rowheader" style="font-weight:400">
         <span class="jug"><span class="n2">${esc(p.nombre)}</span>
-        <span class="m">${esc(p.equipo||'')}${p.equipo?' · ':''}${esc(p.razon_venta)}</span></span>
+        <span class="m">${esc(p.equipo || '')}${p.equipo ? ' · ' : ''}${esc(p.razon_venta)}</span></span>
         <span class="avisos">${av.join('')}</span></th>
-      <td role="cell" data-col="Posición"><span class="pos">${esc((p.posicion||'').slice(0,3))}</span></td>
+      <td role="cell" data-col="Posición"><span class="pos">${esc((p.posicion || '').slice(0,3))}</span></td>
       <td role="cell" data-col="Valor" class="n">${eur(p.valor)}</td>
-      <td role="cell" data-col="7 días" class="n ${p.var_7d>0?'sube':p.var_7d<0?'baja':''}">${pct(p.var_7d)}</td>
-      <td role="cell" data-col="Juega" class="n">${p.probabilidad==null?'—':p.probabilidad+'%'}</td>
-      <td role="cell" data-col="Media" class="n">${p.media_puntos==null?'—':p.media_puntos.toFixed(1)}</td>
+      <td role="cell" data-col="7 días" class="n ${clsVar(p.var_7d)}">${pct(p.var_7d)}</td>
+      <td role="cell" data-col="Juega" class="n">${p.probabilidad == null ? '—' : p.probabilidad + '%'}</td>
+      <td role="cell" data-col="Media" class="n">${p.media_puntos == null ? '—' : p.media_puntos.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
       <td role="cell" data-col="Cláusula" class="n">${eur(p.clausula)}</td>
       <td role="cell" data-col="Recomendación"><span class="pill ${cls}">${esc(p.accion)}</span></td>
     </tr>`;
   }).join('');
 
-  // mercado
-  const M = D.mercado || [];
-  const compras = M.filter(r => r.veredicto==='COMPRAR');
-  const caben = compras.filter(r => r.te_cabe);
-  document.getElementById('mercado-sub').textContent =
-    `${M.length} jugadores en el mercado. ${compras.length} pasan el corte` +
-    (compras.length ? `, ${caben.length} dentro de tu presupuesto.` : '.');
-  document.getElementById('tabla-caption').textContent =
-    'Ordenado por veredicto y después por puntos esperados.';
-
-  let filtro='todos', soloCabe=false;
-  const tb = document.getElementById('filas'), vacio = document.getElementById('vacio');
-
-  function claseV(v){
-    return v==='NO COMPRAR' ? 'v-NO' : 'v-' + v;
+  // ---------------- clausulas ----------------
+  if (AL.length){
+    $('sec-alerta').hidden = false;
+    const baratas = AL.filter(a => a.margen_pct !== null && a.margen_pct <= 20).length;
+    $('alerta-resumen').textContent =
+      `${AL.length} de tus jugadores tienen la cláusula al alcance de alguien` +
+      (baratas ? `, y ${baratas} a menos de un 20% sobre su valor.` : '.');
+    $('riesgos').innerHTML = AL.map(a => `
+      <div class="riesgo">
+        <span class="nom">${esc(a.jugador)}</span>
+        <span class="num">${eur(a.clausula)}</span>
+        <span class="margen">${a.margen_pct === null ? '—' : pct(a.margen_pct)}</span>
+        <span class="quien">Pueden pagarla: ${esc(a.pueden_pagarla.join(', '))}</span>
+      </div>`).join('');
+  } else {
+    $('alerta-vacia').hidden = false;
   }
-  function pinta(){
-    const vis = M.filter(r =>
-      (filtro==='todos' || r.veredicto===filtro) && (!soloCabe || r.te_cabe));
-    vacio.hidden = vis.length>0;
-    tb.innerHTML = vis.map(r => {
-      const av=[];
-      if(!r.te_cabe) av.push('<span class="aviso dinero">no te cabe</span>');
-      if(r.caro_de_salida) av.push('<span class="aviso">piden más de tu máximo</span>');
-      if(r.sin_probabilidad) av.push('<span class="aviso">sin dato de alineación</span>');
-      if(r.posicion_cubierta) av.push('<span class="aviso">posición cubierta</span>');
-      if(r.lo_vende) av.push(`<span class="aviso">lo vende ${esc(r.lo_vende)}</span>`);
-      if(r.pujas) av.push(`<span class="aviso">${r.pujas} puja${r.pujas>1?'s':''}</span>`);
-      const v7 = r.var_7d;
-      const rival = r.rival ? `J${r.jornada} · ${esc(r.rival)}` : esc(r.razon);
-      return `<tr role="row" class="${r.te_cabe?'':'no-cabe'}">
-        <th scope="row" role="rowheader" style="font-weight:400">
-          <span class="jug"><span class="n2">${esc(r.nombre)}</span>
-          <span class="m">${esc(r.equipo||'')}${r.equipo?' · ':''}${rival}</span></span>
-          <span class="avisos">${av.join('')}</span>
-        </th>
-        <td role="cell" data-col="Posición"><span class="pos">${esc((r.posicion||'').slice(0,3))}</span></td>
-        <td role="cell" data-col="Valor" class="n">${eur(r.valor)}</td>
-        <td role="cell" data-col="Piden" class="n">${eur(r.precio_venta)}</td>
-        <td role="cell" data-col="7 días" class="n ${v7>0?'sube':v7<0?'baja':''}">${pct(v7)}</td>
-        <td role="cell" data-col="Juega" class="n">${r.probabilidad==null?'—':r.probabilidad+'%'}</td>
-        <td role="cell" data-col="Media" class="n">${r.media_puntos==null?'—':r.media_puntos.toFixed(1)}</td>
-        <td role="cell" data-col="Esperados" class="n">${r.puntos_esperados==null?'—':r.puntos_esperados.toFixed(1)}</td>
-        <td role="cell" data-col="Veredicto"><span class="pill ${claseV(r.veredicto)}">${esc(r.veredicto)}</span></td>
-        <td role="cell" data-col="Tu máximo" class="n">${r.precio_max?eur(r.precio_max):'—'}</td>
+  badge('badge-clausulas', AL.length, `${AL.length} jugadores tuyos con la cláusula a tiro`);
+
+  if (G.length){
+    $('sec-golpes').hidden = false;
+    const libres = G.filter(c => !c.bloqueada);
+    $('golpes-sub').textContent = `${G.length} jugadores rivales cuya cláusula te cabe en la caja. ` +
+      (libres.length ? `${libres.length} puedes pagarla ya.` : 'Ninguna está abierta ahora mismo: la última columna dice cuándo se abre cada una.');
+    $('filas-golpes').innerHTML = G.slice(0,20).map(c => {
+      const cuando = c.bloqueada
+        ? `<span class="pill bloqueada">${new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</span>`
+        : '<span class="pill libre">Ahora</span>';
+      const av = c.sin_probabilidad ? '<span class="aviso">sin dato de alineación</span>' : '';
+      return `<tr role="row" class="${c.bloqueada ? 'no-cabe' : ''}">
+        <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
+          <span class="n2">${esc(c.nombre)}</span>
+          <span class="m">${esc(c.posicion || '')}${c.equipo ? ' · ' + esc(c.equipo) : ''} · media ${c.media_puntos}</span></span>
+          <span class="avisos">${av}</span></th>
+        <td role="cell" data-col="Se lo quitas a">${esc(c.duenio)}</td>
+        <td role="cell" data-col="Cláusula" class="n">${eur(c.clausula)}</td>
+        <td role="cell" data-col="Sobre valor" class="n ${c.sobreprecio_pct > 20 ? 'baja' : ''}">${pct(c.sobreprecio_pct)}</td>
+        <td role="cell" data-col="Esperados" class="n">${c.esperados.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
+        <td role="cell" data-col="Te queda" class="n">${eur(c.te_queda)}</td>
+        <td role="cell" data-col="Cuándo">${cuando}</td>
       </tr>`;
     }).join('');
+  } else {
+    $('golpes-sub').textContent = 'Ningún jugador rival tiene una cláusula que te quepa en la caja.';
   }
-  document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
-    if(b.dataset.toggle==='cabe'){
-      soloCabe = !soloCabe; b.setAttribute('aria-pressed', String(soloCabe));
-    } else {
-      filtro = b.dataset.filtro;
-      document.querySelectorAll('.chip[data-filtro]').forEach(o =>
-        o.setAttribute('aria-pressed', String(o===b)));
-    }
-    pinta();
-  }));
-  pinta();
 
-  // liga
-  const maxSaldo = Math.max(...D.equipos.map(e => e.saldo_estimado||0), 1);
-  document.getElementById('clasificacion').innerHTML = D.equipos.map(e => `
-    <tr role="row" class="${e.team_id===D.yo.team_id?'yo':''}">
+  badge('badge-mercado', comprasCaben.length, `${comprasCaben.length} compras recomendadas que te caben`);
+
+  // ---------------- liga ----------------
+  const maxSaldo = Math.max(...D.equipos.map(e => e.saldo_estimado || 0), 1);
+  $('clasificacion').innerHTML = D.equipos.map(e => `
+    <tr role="row" class="${e.team_id === D.yo.team_id ? 'yo' : ''}">
       <td role="cell" data-col="Puesto" class="n">${e.posicion}</td>
       <th scope="row" role="rowheader" style="font-weight:400"><span class="jug"><span class="n2">${esc(e.manager)}</span></span></th>
       <td role="cell" data-col="Puntos" class="n">${e.puntos}</td>
       <td role="cell" data-col="Plantilla" class="n">${eur(e.valor_plantilla)}</td>
       <td role="cell" data-col="Saldo" class="n">${eur(e.saldo_estimado)}</td>
-      <td role="cell" data-col="Capacidad"><div class="barra"><span style="width:${Math.round(100*(e.saldo_estimado||0)/maxSaldo)}%"></span></div></td>
+      <td role="cell" data-col="Capacidad"><div class="barra"><span style="width:${Math.round(100 * (e.saldo_estimado || 0) / maxSaldo)}%"></span></div></td>
     </tr>`).join('');
 
-  if((D.sin_emparejar||[]).length){
-    document.getElementById('nota-fuentes').textContent +=
-      ' Sin tendencia para: ' + D.sin_emparejar.join(', ') + '.';
+  if ((D.sin_emparejar || []).length){
+    $('nota-fuentes').textContent += ' Sin tendencia para: ' + D.sin_emparejar.join(', ') + '.';
   }
 
-  // ---- refresco: solo existe si la sirve servidor.py ----
-  // Publicada como artifact la pagina es una foto fija, asi que el boton se
-  // oculta en vez de ofrecer algo que no puede hacer.
-  const btn = document.getElementById('btn-actualizar');
-  const txt = document.getElementById('estado-txt');
+  // ---------------- menu ----------------
+  // La seccion vive en la URL (#mercado): sobrevive a la recarga tras actualizar
+  // y permite guardar un acceso directo a una seccion concreta.
+  const SECCIONES = ['resumen', 'mercado', 'equipo', 'clausulas', 'liga'];
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+
+  function abre(id, {foco = false, arriba = true} = {}){
+    if (!SECCIONES.includes(id)) id = 'resumen';
+    tabs.forEach(t => {
+      const on = t.dataset.tab === id;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      if (on && foco) t.focus();
+    });
+    SECCIONES.forEach(s => { $('panel-' + s).hidden = s !== id; });
+    if (location.hash.slice(1) !== id){
+      try { history.replaceState(null, '', '#' + id); } catch (e) { /* sandbox sin history */ }
+    }
+    if (arriba) window.scrollTo(0, 0);
+  }
+
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => abre(t.dataset.tab));
+    t.addEventListener('keydown', e => {
+      let j = null;
+      if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+      if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      if (e.key === 'Home') j = 0;
+      if (e.key === 'End') j = tabs.length - 1;
+      if (j !== null){ e.preventDefault(); abre(tabs[j].dataset.tab, {foco: true}); }
+    });
+  });
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-ir]');
+    if (!b) return;
+    if (b.dataset.orden){
+      orden = b.dataset.orden; $('f-orden').value = orden; pinta();
+    }
+    abre(b.dataset.ir);
+    if (b.dataset.sec){ const s = $(b.dataset.sec); if (s && !s.hidden) s.scrollIntoView({block: 'start'}); }
+  });
+  window.addEventListener('hashchange', () => abre(location.hash.slice(1), {arriba: false}));
+  abre(location.hash.slice(1), {arriba: false});
+
+  // ---------------- refresco: solo si la sirve servidor.py ----------------
+  // Publicada (artifact o GitHub Pages) la pagina es una foto fija, asi que el
+  // boton se oculta en vez de ofrecer algo que no puede hacer.
+  const btn = $('btn-actualizar');
+  const txt = $('estado-txt');
   const generado = D.generado;
   let esperando = false;
 
@@ -705,14 +1036,14 @@
     const m = Math.round((Date.now() - new Date(iso)) / 60000);
     if (m < 1) return 'ahora mismo';
     if (m < 60) return `hace ${m} min`;
-    return `hace ${Math.round(m/60)} h`;
+    return `hace ${Math.round(m / 60)} h`;
   };
 
   async function mira(){
     let s;
-    try { s = await (await fetch('/estado', {cache:'no-store'})).json(); }
-    catch { return null; }
-    document.getElementById('bloque-refresco').hidden = false;
+    try { s = await (await fetch('/estado', {cache: 'no-store'})).json(); }
+    catch (e) { return null; }
+    $('bloque-refresco').hidden = false;
     btn.disabled = s.actualizando;
     txt.classList.toggle('mal', Boolean(s.ultimo_error));
     if (s.actualizando){
@@ -731,13 +1062,13 @@
 
   btn.addEventListener('click', async () => {
     btn.disabled = true; txt.textContent = 'actualizando…'; esperando = true;
-    try { await fetch('/actualizar', {method:'POST'}); }
-    catch { txt.textContent = 'no se pudo avisar al servidor'; txt.classList.add('mal'); btn.disabled = false; }
+    try { await fetch('/actualizar', {method: 'POST'}); }
+    catch (e) { txt.textContent = 'no se pudo avisar al servidor'; txt.classList.add('mal'); btn.disabled = false; }
   });
 
   mira().then(s => {
-    if (s === null) return;          // servida como artifact: sin controles
-    setInterval(mira, 10000);        // el pipeline tarda un par de minutos
+    if (s === null) return;
+    setInterval(mira, 10000);
   });
 })();
 </script>

@@ -49,8 +49,15 @@ de FútbolFantasy y `vista.py` genera **dos** páginas autónomas: `vista.html`
 el que sirve el servidor). Sin ese viewport, iOS renderiza a 980 px de ancho y
 el diseño móvil no se activa.
 
-En pantalla estrecha las tablas se convierten en fichas —etiqueta y valor por
-línea— en vez de obligarte a hacer scroll lateral. Las cabeceras se ocultan
+El panel se organiza en cinco secciones con menú —Resumen, Mercado, Equipo,
+Cláusulas y Liga—, arriba en escritorio y en una barra inferior en el móvil. La
+sección activa va en la URL (`#mercado`), así que sobrevive a la recarga tras
+actualizar. En el mercado se filtra por veredicto, por vendedor (LaLiga, cualquier
+mánager o uno concreto) y se ordena, entre otras cosas, por la **subida de hoy**:
+la variación de valor en 24 h, en euros y porcentaje, sacada de FútbolFantasy.
+
+En pantalla estrecha las tablas se convierten en fichas de dos columnas en vez
+de obligarte a hacer scroll lateral. Las cabeceras se ocultan
 visualmente pero siguen ahí, y las tablas llevan roles ARIA explícitos para que
 cambiar el `display` no les quite la semántica.
 
