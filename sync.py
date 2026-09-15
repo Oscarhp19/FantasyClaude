@@ -11,6 +11,7 @@ la clausula al alcance de alguien.
 """
 import argparse
 import json
+import random
 import sys
 import time
 from datetime import datetime
@@ -44,25 +45,84 @@ def num(x, defecto=0.0):
         return defecto
 
 
-def descarga_actividad(liga_id, max_paginas=40):
-    """El feed va paginado por indice. Paramos cuando deja de traer ids nuevos."""
-    eventos, vistos = [], set()
+CACHE = DATA / "cache_api.json"
+
+# Cuanto aguanta cada respuesta antes de volver a pedirla. El mercado y la
+# actividad se piden en cada pase porque son lo que cambia a cada rato; lo demas
+# solo cuando caduca, o antes si la actividad dice que ha habido fichajes.
+# Pedirlo todo cada vez eran ~33 llamadas por pase: el patron de un bot.
+TTL = {
+    "ligas": 24 * 3600,
+    "formaciones": 24 * 3600,
+    "clasificacion": 60 * 60,
+    "plantilla": 60 * 60,
+    "alineacion": 60 * 60,
+    "ofertas": 30 * 60,
+    "dinero": 20 * 60,
+}
+
+
+def pausa():
+    """Espera irregular entre peticiones: un ritmo exacto delata a un script."""
+    time.sleep(random.uniform(0.6, 1.8))
+
+
+class Cache:
+    def __init__(self, ignorar=False):
+        self.d = {}
+        if not ignorar:
+            try:
+                self.d = json.loads(CACHE.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                self.d = {}
+        self.ahora = time.time()
+        self.de_red, self.de_cache = 0, 0
+
+    def dame(self, clave, pedir, forzar=False):
+        entrada = self.d.get(clave)
+        if entrada and not forzar and self.ahora < entrada["caduca"]:
+            self.de_cache += 1
+            return entrada["v"]
+        valor = pedir()
+        tipo = clave.split(":")[0]
+        # Caducidad con un +-25% al azar: si no, todo lo que se pidio junto
+        # caduca junto y sale en rafaga siempre a la misma hora.
+        self.d[clave] = {"v": valor, "caduca": self.ahora + TTL[tipo] * random.uniform(0.75, 1.25)}
+        self.de_red += 1
+        pausa()
+        return valor
+
+    def guarda(self):
+        DATA.mkdir(parents=True, exist_ok=True)
+        CACHE.write_text(json.dumps(self.d, ensure_ascii=False), encoding="utf-8")
+
+
+def descarga_actividad(liga_id, cache, max_paginas=40):
+    """Solo lo nuevo: el feed va de mas reciente a mas antiguo, asi que en cuanto
+    una pagina trae un evento que ya teniamos, lo que sigue tambien lo es.
+
+    Devuelve (todos los eventos, cuantos son nuevos respecto al pase anterior).
+    """
+    previos = cache.d.get("actividad", {}).get("v", [])
+    conocidos = {e.get("id") for e in previos}
+    nuevos = []
     for i in range(max_paginas):
         try:
             pagina = api.actividad(liga_id, i)
         except SystemExit as e:
             print(f"  aviso: actividad pagina {i} fallo ({e})", file=sys.stderr)
             break
+        pausa()
         if not pagina:
             break
-        nuevos = [e for e in pagina if e.get("id") not in vistos]
-        if not nuevos:
+        frescos = [e for e in pagina if e.get("id") not in conocidos]
+        conocidos.update(e.get("id") for e in frescos)
+        nuevos.extend(frescos)
+        if len(frescos) < len(pagina):
             break
-        vistos.update(e.get("id") for e in nuevos)
-        eventos.extend(nuevos)
-        time.sleep(0.3)
-    eventos.sort(key=lambda e: e.get("createdAt") or "")
-    return eventos
+    eventos = sorted(previos + nuevos, key=lambda e: e.get("createdAt") or "")
+    cache.d["actividad"] = {"v": eventos, "caduca": 0}
+    return eventos, (len(nuevos) if previos else 0)
 
 
 def saldos_estimados(eventos, manager_ids):
@@ -95,10 +155,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--liga", help="id de liga (si no, la primera tuya)")
     ap.add_argument("--resumen", action="store_true", help="no escribir fichero")
+    ap.add_argument("--completo", action="store_true",
+                    help="ignora la cache y lo pide todo (lo usa el boton Actualizar)")
     args = ap.parse_args()
+    cache = Cache(ignorar=args.completo)
 
-    print("Leyendo tus ligas...", file=sys.stderr)
-    ligas = api.ligas()
+    ligas = cache.dame("ligas", api.ligas)
     if not ligas:
         sys.exit("No apareces en ninguna liga.")
     liga = next((l for l in ligas if l["id"] == args.liga), ligas[0]) if args.liga else ligas[0]
@@ -106,12 +168,16 @@ def main():
     mi_equipo = str(liga["team"]["id"])
     print(f"  {liga['name']} ({liga['managersNumber']} managers)", file=sys.stderr)
 
-    print("Clasificacion, dinero, mercado y actividad...", file=sys.stderr)
-    clasif = api.clasificacion(liga_id)
-    dinero = api.dinero(mi_equipo)
+    # Siempre frescos: lo que cambia sin avisar.
     mercado = api.mercado(liga_id)
-    eventos = descarga_actividad(liga_id)
-    print(f"  {len(mercado)} en mercado, {len(eventos)} movimientos", file=sys.stderr)
+    pausa()
+    eventos, nuevos = descarga_actividad(liga_id, cache)
+    # Un fichaje, venta o clausulazo cambia plantillas, clasificacion y dinero.
+    hay_fichajes = nuevos > 0
+    print(f"  {len(mercado)} en mercado, {len(eventos)} movimientos ({nuevos} nuevos)", file=sys.stderr)
+
+    clasif = cache.dame("clasificacion", lambda: api.clasificacion(liga_id), forzar=hay_fichajes)
+    dinero = cache.dame("dinero", lambda: api.dinero(mi_equipo), forzar=hay_fichajes)
 
     equipos = {}
     for fila in clasif:
@@ -124,10 +190,10 @@ def main():
             "valor_plantilla": t.get("teamValue"),
         }
 
-    print(f"Plantillas de los {len(equipos)} equipos...", file=sys.stderr)
     for mid, info in equipos.items():
         try:
-            p = api.plantilla(liga_id, info["team_id"])
+            p = cache.dame(f"plantilla:{info['team_id']}",
+                           lambda tid=info["team_id"]: api.plantilla(liga_id, tid), forzar=hay_fichajes)
         except SystemExit as e:
             print(f"  aviso: plantilla de {info['manager']} fallo ({e})", file=sys.stderr)
             info["jugadores"] = []
@@ -151,7 +217,6 @@ def main():
             }
             for j in (p.get("players") or [])
         ]
-        time.sleep(0.3)
 
     # --- ofertas recibidas y once actual: solo de tu equipo ---
     mi_manager_tmp = next((m for m, i in equipos.items() if i["team_id"] == mi_equipo), None)
@@ -160,7 +225,8 @@ def main():
         if not j["player_team_id"]:
             continue
         try:
-            recibidas = api.ofertas(liga_id, j["player_team_id"])
+            recibidas = cache.dame(f"ofertas:{j['player_team_id']}",
+                                   lambda pt=j["player_team_id"]: api.ofertas(liga_id, pt))
         except SystemExit as e:
             print(f"  aviso: ofertas de {j['nombre']} fallaron ({e})", file=sys.stderr)
             continue
@@ -175,18 +241,21 @@ def main():
                 }
                 for o in pendientes
             ]
-        time.sleep(0.3)
     print(f"  {sum(len(v) for v in ofertas.values())} ofertas pendientes", file=sys.stderr)
 
     try:
-        once = api.alineacion(mi_equipo)
+        once = cache.dame("alineacion", lambda: api.alineacion(mi_equipo))
     except SystemExit as e:
         print(f"  aviso: alineacion fallo ({e})", file=sys.stderr)
         once = {}
     try:
-        formas = api.formaciones(True) + api.formaciones(False)
+        formas = cache.dame("formaciones", lambda: api.formaciones(True) + api.formaciones(False))
     except SystemExit:
         formas = []
+
+    cache.guarda()
+    print(f"  {api.PETICIONES} peticiones a LaLiga en este pase "
+          f"({cache.de_cache} respuestas reutilizadas de la cache)", file=sys.stderr)
 
     saldo, tipos_raros = saldos_estimados(eventos, equipos.keys())
     # El dinero real del equipo propio manda sobre la estimacion.

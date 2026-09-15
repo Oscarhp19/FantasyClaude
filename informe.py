@@ -367,7 +367,19 @@ def main():
         FF.write_text(json.dumps(ff_doc, ensure_ascii=False, indent=1), encoding="utf-8")
     ff = ff_doc["jugadores"]
 
-    equipos_reales = {str(t["id"]): t["name"] for t in api.equipos()}
+    # Los equipos de LaLiga no cambian en toda la temporada: pedirlos en cada pase
+    # era una llamada tirada. Se guardan un dia.
+    cache_eq = DATA / "equipos.json"
+    try:
+        guardado = json.loads(cache_eq.read_text(encoding="utf-8"))
+        if datetime.now() - datetime.fromisoformat(guardado["actualizado"]) > timedelta(days=1):
+            raise ValueError("caducado")
+        lista_equipos = guardado["equipos"]
+    except (OSError, ValueError, KeyError):
+        lista_equipos = api.equipos()
+        cache_eq.write_text(json.dumps({"actualizado": datetime.now().isoformat(timespec="seconds"),
+                                        "equipos": lista_equipos}, ensure_ascii=False), encoding="utf-8")
+    equipos_reales = {str(t["id"]): t["name"] for t in lista_equipos}
     mi_dinero = liga["yo"]["dinero"]
     mios = next((e for e in liga["equipos"] if e["team_id"] == liga["yo"]["team_id"]), {})
     mis_posiciones = {}

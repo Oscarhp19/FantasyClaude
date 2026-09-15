@@ -10,6 +10,7 @@ que abrir en el movil, que debe estar en la misma red que este ordenador.
 """
 import argparse
 import json
+import random
 import socket
 import subprocess
 import sys
@@ -48,8 +49,12 @@ def ip_local():
         s.close()
 
 
-def actualiza():
-    """Ejecuta el pipeline. Un solo pase a la vez."""
+def actualiza(completo=False):
+    """Ejecuta el pipeline. Un solo pase a la vez.
+
+    completo=True (el boton) lo pide todo sin cache: es lo que haria una persona
+    que abre la app para mirar. Los pases automaticos solo piden lo que cambia.
+    """
     with cerrojo:
         if estado["actualizando"]:
             return False
@@ -57,8 +62,9 @@ def actualiza():
     inicio = time.time()
     try:
         for paso in PASOS:
+            extra = ["--completo"] if completo and paso == "sync.py" else []
             r = subprocess.run(
-                [sys.executable, str(AQUI / paso)],
+                [sys.executable, str(AQUI / paso), *extra],
                 capture_output=True, text=True, cwd=str(AQUI), timeout=900,
             )
             if r.returncode != 0:
@@ -81,10 +87,25 @@ def actualiza():
         estado["actualizando"] = False
 
 
-def bucle(minutos):
+# De 1:00 a 8:00 nadie mira el mercado cada dos minutos. Seguir al mismo ritmo
+# toda la noche es justo el patron que delata a un script.
+NOCHE = (1, 8)
+MINUTOS_NOCHE = 30
+
+
+def espera(minutos, descanso_nocturno):
+    base = minutos * 60
+    if descanso_nocturno and NOCHE[0] <= datetime.now().hour < NOCHE[1]:
+        base = max(base, MINUTOS_NOCHE * 60)
+    # +-30% al azar: un intervalo exacto es la firma de un bot.
+    return base * random.uniform(0.7, 1.3)
+
+
+def bucle(minutos, descanso_nocturno):
     while True:
-        time.sleep(minutos * 60)
-        print(f"[{datetime.now():%H:%M:%S}] refresco automatico...")
+        segundos = espera(minutos, descanso_nocturno)
+        time.sleep(segundos)
+        print(f"[{datetime.now():%H:%M:%S}] refresco automatico (tras {segundos / 60:.1f} min)...")
         actualiza()
 
 
@@ -119,7 +140,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._envia(404, json.dumps({"error": "no existe"}))
         if estado["actualizando"]:
             return self._envia(409, json.dumps({"error": "ya se esta actualizando", **estado}))
-        threading.Thread(target=actualiza, daemon=True).start()
+        threading.Thread(target=actualiza, kwargs={"completo": True}, daemon=True).start()
         self._envia(202, json.dumps({"lanzado": True}))
 
 
@@ -128,6 +149,8 @@ def main():
     ap.add_argument("--puerto", type=int, default=8000)
     ap.add_argument("--cada", type=int, default=2, help="minutos entre refrescos")
     ap.add_argument("--sin-refresco", action="store_true")
+    ap.add_argument("--sin-descanso-nocturno", action="store_true",
+                    help="mantener el ritmo tambien de 1:00 a 8:00")
     args = ap.parse_args()
 
     if not VISTA.exists():
@@ -135,7 +158,7 @@ def main():
         actualiza()
 
     if not args.sin_refresco:
-        threading.Thread(target=bucle, args=(args.cada,), daemon=True).start()
+        threading.Thread(target=bucle, args=(args.cada, not args.sin_descanso_nocturno), daemon=True).start()
 
     # Enlazamos ANTES de anunciar nada: si el puerto esta pillado por otra copia
     # del servidor, lo normal seria imprimir la direccion y morir despues, y te
@@ -154,7 +177,8 @@ def main():
     print(f"    este equipo   http://localhost:{args.puerto}")
     print(f"    iPhone / iPad http://{ip}:{args.puerto}   (misma red)")
     if not args.sin_refresco:
-        print(f"\n  Refresco automatico cada {args.cada} min. Ctrl+C para parar.")
+        noche = "" if args.sin_descanso_nocturno else f", cada {MINUTOS_NOCHE} de {NOCHE[0]}:00 a {NOCHE[1]}:00"
+        print(f"\n  Refresco automatico cada ~{args.cada} min (irregular){noche}. Ctrl+C para parar.")
     if estado["ultimo_ok"]:
         print(f"  Ultimos datos: {estado['ultimo_ok']}")
     print()

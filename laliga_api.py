@@ -22,7 +22,13 @@ BASE = "https://fantasy-api.llt-services.com/api"
 COMP_RUTA = "/v1/competition/1"
 
 
+# Cuantas llamadas hace este proceso: sirve para vigilar que no parezca un bot.
+PETICIONES = 0
+
+
 def pide(ruta, autenticado=True):
+    global PETICIONES
+    PETICIONES += 1
     url = ruta if ruta.startswith("http") else BASE + ruta
     cabeceras = {
         "Accept": "application/json",

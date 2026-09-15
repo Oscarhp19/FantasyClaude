@@ -282,9 +282,37 @@ volver a ella en el móvil, si hay una versión más nueva, y se recarga sin per
 la sección, los filtros ni el scroll. Se pone en marcha con un solo comando,
 `python configurar_github.py`: detalles en [SETUP-GITHUB.md](SETUP-GITHUB.md).
 
-Refrescar tan a menudo tiene un coste: cada pase son unas 30 llamadas a la API
-de LaLiga, y cuanto más regular y frecuente es el patrón, más fácil es que
-parezca un bot. Si prefieres ir con cuidado, `python servidor.py --cada 10`.
+## Para que no parezca un bot
+
+Refrescar a menudo no delata por sí solo; lo que delata es el patrón. Hay cuatro
+medidas, y ninguna baja la frecuencia durante el día:
+
+**Solo se pide lo que cambia.** El mercado y el feed de actividad se piden en
+cada pase. Todo lo demás —plantillas, clasificación, dinero, ofertas, once,
+formaciones— se guarda en `data/cache_api.json` y solo se vuelve a pedir cuando
+caduca (de 20 minutos a un día según el dato) o en cuanto la actividad muestra un
+fichaje, una venta o un clausulazo. La actividad también es incremental: se deja
+de paginar al llegar a un movimiento ya conocido. Un pase normal hace **2
+peticiones**; antes eran 29.
+
+**Nada ocurre a intervalos exactos.** El servidor espera entre el 70 % y el
+130 % del intervalo, las pausas entre peticiones son al azar, las caducidades
+llevan un ±25 % para que no venzan todas a la vez, y el robot de GitHub arranca
+con un retraso aleatorio de hasta minuto y medio.
+
+**De noche, a ritmo de persona.** De 1:00 a 8:00 se refresca cada media hora,
+tanto en casa como en GitHub. Si no lo quieres: `python servidor.py
+--sin-descanso-nocturno`.
+
+**El robot no inicia sesión en cada pase.** Guarda la sesión entre ejecuciones
+(`estado_ci.py`) y solo usa tu contraseña si ha dejado de valer. Antes eran 288
+logins con contraseña al día desde servidores de GitHub, que era la señal más
+clara de todas. El estado va cifrado con una clave derivada de tus secretos,
+porque la caché de Actions de un repo público la puede leer un pull request de un
+fork, y esos no reciben los secretos.
+
+El botón **Actualizar** sí lo pide todo, sin caché: es lo que haría una persona
+que abre la app para mirar.
 
 El login en CI no es interactivo: `laliga_auth.py password` coge
 `LALIGA_EMAIL` y `LALIGA_PASSWORD` del entorno si existen. Cada ejecución

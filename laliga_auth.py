@@ -16,7 +16,8 @@ Hay dos formas de entrar, una sola vez:
     python laliga_auth.py login      # imprime un enlace; lo abres y entras
     python laliga_auth.py codigo "authredirect://...?code=..."   # pegas la URL
 
-A partir de ahi el token se refresca solo. La contrasena, si usas la opcion 1,
+A partir de ahi el token se refresca solo. `asegura` hace lo mismo sin preguntar
+nada: reutiliza la sesion y solo usa LALIGA_EMAIL/LALIGA_PASSWORD si ya no vale. La contrasena, si usas la opcion 1,
 viaja unicamente a login.laliga.es y no se guarda en ningun sitio.
 """
 import base64
@@ -226,6 +227,20 @@ def token_valido():
 
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "asegura":
+        # Para el robot de GitHub: reutiliza la sesion guardada y solo mete la
+        # contrasena si ya no vale. Un login con contrasena cada pocos minutos
+        # desde un servidor es la senal mas clara de que no hay una persona.
+        if TOKENS.exists():
+            try:
+                token_valido()
+                print("Sesion reutilizada: sin iniciar sesion con contrasena.")
+                return
+            except SystemExit as e:
+                print(f"La sesion guardada ya no vale ({e}). Se inicia sesion de nuevo.")
+        else:
+            print("No hay sesion guardada. Se inicia sesion con contrasena.")
+        cmd = "password"
     if cmd == "password":
         import getpass
 

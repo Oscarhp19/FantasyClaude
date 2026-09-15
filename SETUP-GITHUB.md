@@ -38,17 +38,19 @@ secreto, no aparece en el repositorio aunque sea público, y la página lleva
 `noindex`, así que no la encontrará un buscador. Pero si compartes el enlace,
 compartes los datos.
 
-**Cada 5 minutos es el mínimo, y no es puntual.** GitHub no admite un
-`schedule` más frecuente, y cuando hay carga retrasa o se salta ejecuciones: en
-la práctica pueden ser 7 o 15. La página del móvil busca una versión nueva cada
-2 minutos, así que en cuanto el robot publica, la ves.
+**Cada 5 minutos de día, cada 30 de noche.** GitHub no admite un `schedule`
+más frecuente, y cuando hay carga retrasa o se salta ejecuciones: en la práctica
+pueden ser 7 o 15. De 1:00 a 8:00 va cada media hora para no dejar un patrón de
+bot. La página del móvil busca una versión nueva cada 2 minutos, así que en
+cuanto el robot publica, la ves.
 
 **Se apaga solo a los 60 días.** GitHub desactiva los workflows programados en
 repos sin actividad durante dos meses. Te avisa por correo y se reactiva con un
 clic.
 
 **Tu contraseña de LaLiga está en GitHub.** Cifrada, en tu cuenta, y no aparece
-en los logs. Si deja de convencerte, borra los secretos en *Settings → Secrets
+en los logs. El robot no la usa en cada pase: reutiliza la sesión guardada y solo
+vuelve a iniciar sesión si ha caducado. Si deja de convencerte, borra los secretos en *Settings → Secrets
 and variables → Actions* y el robot se para.
 
 ## Si algo falla
