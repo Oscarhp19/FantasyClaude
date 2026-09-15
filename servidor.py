@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sirve el panel en tu red local y lo mantiene al dia.
 
-    python servidor.py                # puerto 8000, refresco cada 15 min
+    python servidor.py                # puerto 8000, refresco cada 2 min
     python servidor.py --puerto 8080 --cada 30
 
 Da lo que una pagina publicada no puede dar: un boton que rehace los datos de
@@ -126,7 +126,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--puerto", type=int, default=8000)
-    ap.add_argument("--cada", type=int, default=15, help="minutos entre refrescos")
+    ap.add_argument("--cada", type=int, default=2, help="minutos entre refrescos")
     ap.add_argument("--sin-refresco", action="store_true")
     args = ap.parse_args()
 

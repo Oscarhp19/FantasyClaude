@@ -18,7 +18,7 @@ teclear los nombres a mano.
 python servidor.py
 ```
 
-Levanta el panel, lo refresca cada 15 minutos y añade un botón **Actualizar**
+Levanta el panel, lo refresca cada 2 minutos y añade un botón **Actualizar**
 que rehace los datos al momento. Al arrancar imprime dos direcciones: una para
 este ordenador y otra para el móvil, que tiene que estar en la misma wifi.
 
@@ -276,9 +276,15 @@ oficial exacto, tu dinero y el feed de la liga. El análisis cruza ambos.
 ## Verlo con el PC apagado
 
 `.github/workflows/actualizar.yml` ejecuta el pipeline en los servidores de
-GitHub cada 15 minutos y publica el panel en GitHub Pages. Se pone en marcha
-con un solo comando, `python configurar_github.py`: detalles en
-[SETUP-GITHUB.md](SETUP-GITHUB.md).
+GitHub cada 5 minutos —el mínimo que admite su programador— y publica el panel
+en GitHub Pages. La página publicada comprueba por su cuenta cada 2 minutos, y al
+volver a ella en el móvil, si hay una versión más nueva, y se recarga sin perder
+la sección, los filtros ni el scroll. Se pone en marcha con un solo comando,
+`python configurar_github.py`: detalles en [SETUP-GITHUB.md](SETUP-GITHUB.md).
+
+Refrescar tan a menudo tiene un coste: cada pase son unas 30 llamadas a la API
+de LaLiga, y cuanto más regular y frecuente es el patrón, más fácil es que
+parezca un bot. Si prefieres ir con cuidado, `python servidor.py --cada 10`.
 
 El login en CI no es interactivo: `laliga_auth.py password` coge
 `LALIGA_EMAIL` y `LALIGA_PASSWORD` del entorno si existen. Cada ejecución

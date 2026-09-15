@@ -138,6 +138,9 @@
     display:grid; grid-template-columns:1fr auto auto; gap:4px 16px; align-items:center;
   }
   .riesgo .quien{grid-column:1/-1; font-size:12.5px; color:var(--muted)}
+  .riesgo .prot{grid-column:1/-1; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .riesgo .prot small, .cuando small{font-family:var(--mono); font-size:11.5px; color:var(--muted)}
+  .cuando{display:inline-flex; flex-direction:column; align-items:flex-start; gap:3px}
   .riesgo .nom{font-weight:600}
   .riesgo .margen{
     font-family:var(--mono); font-size:12.5px; font-weight:700;
@@ -560,7 +563,7 @@
               <th scope="col" class="n">Sobre valor</th>
               <th scope="col" class="n">Esper.</th>
               <th scope="col" class="n">Te queda</th>
-              <th scope="col">Cuándo</th>
+              <th scope="col">Se abre</th>
             </tr>
           </thead>
           <tbody role="rowgroup" id="filas-golpes"></tbody>
@@ -634,6 +637,22 @@
   const clsVar = n => n > 0 ? 'sube' : n < 0 ? 'baja' : '';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fechaCorta = iso => new Date(iso).toLocaleString('es-ES', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+
+  // Cuenta atras contra el reloj de quien mira, no contra la hora en que se
+  // generaron los datos: la pagina publicada puede abrirse horas despues.
+  const abierta = iso => !iso || new Date(iso) <= Date.now();
+  function falta(iso){
+    const ms = new Date(iso) - Date.now();
+    if (!(ms > 0)) return null;
+    const min = Math.ceil(ms / 60000);
+    const d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+    if (d) return `${d} d ${h} h`;
+    if (h) return `${h} h ${m} min`;
+    return `${m} min`;
+  }
+  // data-hasta lo recorre el temporizador de abajo para que el texto no se quede viejo.
+  const cuenta = (iso, prefijo) => `<span data-hasta="${esc(iso)}" data-prefijo="${esc(prefijo)}">${
+    falta(iso) ? prefijo + falta(iso) : 'abierta ya'}</span>`;
   const $ = id => document.getElementById(id);
   const badge = (id, n, texto) => {
     const b = $(id); if (!b) return;
@@ -715,12 +734,12 @@
   }
 
   if (G.length){
-    const libres = G.filter(c => !c.bloqueada);
+    const libres = G.filter(c => abierta(c.disponible_desde));
     tiles.push(`<article class="tile">
       <div class="tile-cab"><h3>Puedes quitar</h3><span class="badge">${G.length}</span></div>
-      <p class="tile-dato">${libres.length ? `${libres.length} cláusulas abiertas ahora mismo.` : 'Ninguna abierta ahora. Estas son las mejores y cuándo se abren.'}</p>
+      <p class="tile-dato">${libres.length ? `${libres.length} cláusulas abiertas ahora mismo.` : `Ninguna abierta todavía. La primera se abre en ${falta(G.map(c => c.disponible_desde).filter(Boolean).sort()[0]) || 'breve'}.`}</p>
       <ul class="mini">${G.slice(0,3).map(c => `
-        <li><span class="qn"><b>${esc(c.nombre)}</b><small>de ${esc(c.duenio)} · ${c.bloqueada ? 'abre el ' + new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'}) : 'abierta'}</small></span>
+        <li><span class="qn"><b>${esc(c.nombre)}</b><small>de ${esc(c.duenio)} · ${cuenta(c.disponible_desde, 'abre en ')}</small></span>
         <span class="cf">${eur(c.clausula)}<br>${c.esperados.toLocaleString('es-ES',{maximumFractionDigits:1})} esp</span></li>`).join('')}</ul>
       <button class="ir" type="button" data-ir="clausulas">Ver clausulazos</button>
     </article>`);
@@ -919,14 +938,19 @@
   if (AL.length){
     $('sec-alerta').hidden = false;
     const baratas = AL.filter(a => a.margen_pct !== null && a.margen_pct <= 20).length;
+    const expuestas = AL.filter(a => abierta(a.bloqueada_hasta)).length;
     $('alerta-resumen').textContent =
       `${AL.length} de tus jugadores tienen la cláusula al alcance de alguien` +
-      (baratas ? `, y ${baratas} a menos de un 20% sobre su valor.` : '.');
+      (baratas ? `, ${baratas} a menos de un 20% sobre su valor` : '') + '. ' +
+      (expuestas ? `${expuestas} ya se pueden pagar.` : 'Todas siguen protegidas: debajo de cada una, cuánto le queda.');
     $('riesgos').innerHTML = AL.map(a => `
       <div class="riesgo">
         <span class="nom">${esc(a.jugador)}</span>
         <span class="num">${eur(a.clausula)}</span>
         <span class="margen">${a.margen_pct === null ? '—' : pct(a.margen_pct)}</span>
+        <span class="prot">${abierta(a.bloqueada_hasta)
+          ? '<span class="pill a-VENDER">Expuesta ya</span>'
+          : `<span class="pill bloqueada">Protegida · ${cuenta(a.bloqueada_hasta, '')}</span><small>hasta el ${fechaCorta(a.bloqueada_hasta)}</small>`}</span>
         <span class="quien">Pueden pagarla: ${esc(a.pueden_pagarla.join(', '))}</span>
       </div>`).join('');
   } else {
@@ -936,15 +960,16 @@
 
   if (G.length){
     $('sec-golpes').hidden = false;
-    const libres = G.filter(c => !c.bloqueada);
+    const libres = G.filter(c => abierta(c.disponible_desde));
     $('golpes-sub').textContent = `${G.length} jugadores rivales cuya cláusula te cabe en la caja. ` +
-      (libres.length ? `${libres.length} puedes pagarla ya.` : 'Ninguna está abierta ahora mismo: la última columna dice cuándo se abre cada una.');
+      (libres.length ? `${libres.length} se pueden pagar ya. ` : 'Ninguna está abierta todavía: la última columna dice cuánto falta. ') +
+      'Ojo: aunque esté desbloqueada, el juego no deja pagar cláusulas en las 24 horas previas a un partido.';
     $('filas-golpes').innerHTML = G.slice(0,20).map(c => {
-      const cuando = c.bloqueada
-        ? `<span class="pill bloqueada">${new Date(c.disponible_desde).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</span>`
-        : '<span class="pill libre">Ahora</span>';
+      const cuando = abierta(c.disponible_desde)
+        ? '<span class="pill libre">Ahora</span>'
+        : `<span class="cuando"><span class="pill bloqueada">${cuenta(c.disponible_desde, 'en ')}</span><small>${fechaCorta(c.disponible_desde)}</small></span>`;
       const av = c.sin_probabilidad ? '<span class="aviso">sin dato de alineación</span>' : '';
-      return `<tr role="row" class="${c.bloqueada ? 'no-cabe' : ''}">
+      return `<tr role="row" class="${abierta(c.disponible_desde) ? '' : 'no-cabe'}">
         <th scope="row" role="rowheader" style="font-weight:400"><span class="jug">
           <span class="n2">${esc(c.nombre)}</span>
           <span class="m">${esc(c.posicion || '')}${c.equipo ? ' · ' + esc(c.equipo) : ''} · media ${c.media_puntos}</span></span>
@@ -954,7 +979,7 @@
         <td role="cell" data-col="Sobre valor" class="n ${c.sobreprecio_pct > 20 ? 'baja' : ''}">${pct(c.sobreprecio_pct)}</td>
         <td role="cell" data-col="Esperados" class="n">${c.esperados.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
         <td role="cell" data-col="Te queda" class="n">${eur(c.te_queda)}</td>
-        <td role="cell" data-col="Cuándo">${cuando}</td>
+        <td role="cell" data-col="Se abre">${cuando}</td>
       </tr>`;
     }).join('');
   } else {
@@ -1024,13 +1049,58 @@
   window.addEventListener('hashchange', () => abre(location.hash.slice(1), {arriba: false}));
   abre(location.hash.slice(1), {arriba: false});
 
-  // ---------------- refresco: solo si la sirve servidor.py ----------------
-  // Publicada (artifact o GitHub Pages) la pagina es una foto fija, asi que el
-  // boton se oculta en vez de ofrecer algo que no puede hacer.
+  // ---------------- cuentas atras ----------------
+  function refrescaCuentas(){
+    document.querySelectorAll('[data-hasta]').forEach(el => {
+      const t = falta(el.dataset.hasta);
+      if (t){ el.textContent = el.dataset.prefijo + t; return; }
+      // Se ha abierto mientras mirabas: cambia el estado, no solo el texto.
+      const prot = el.closest('.prot');
+      if (prot){ prot.innerHTML = '<span class="pill a-VENDER">Expuesta ya</span>'; return; }
+      const cuando = el.closest('.cuando');
+      if (cuando){
+        const tr = cuando.closest('tr'); if (tr) tr.classList.remove('no-cabe');
+        cuando.outerHTML = '<span class="pill libre">Ahora</span>';
+        return;
+      }
+      el.textContent = 'abierta ya';
+      el.removeAttribute('data-hasta');
+    });
+  }
+  setInterval(refrescaCuentas, 30000);
+
+  // ---------------- recarga sin perder el sitio ----------------
+  // Antes de recargar se guarda donde estabas (filtros y scroll), para que una
+  // recarga automatica no te saque de lo que estabas mirando.
+  const CLAVE = 'fantasy-vista';
+  function recarga(){
+    try {
+      sessionStorage.setItem(CLAVE, JSON.stringify({filtro, soloCabe, vendedor, orden, y: window.scrollY}));
+    } catch (e) { /* sin almacenamiento: se recarga igual, arriba del todo */ }
+    // ?t= salta la cache de GitHub Pages, que guarda el HTML hasta 10 minutos.
+    location.replace(location.pathname + '?t=' + Date.now() + location.hash);
+  }
+  (function restaura(){
+    if (location.search.includes('t=')){
+      try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+    }
+    let e = null;
+    try { e = JSON.parse(sessionStorage.getItem(CLAVE) || 'null'); sessionStorage.removeItem(CLAVE); } catch (x) {}
+    if (!e) return;
+    filtro = e.filtro || 'todos'; soloCabe = Boolean(e.soloCabe); orden = e.orden || 'recomendacion';
+    vendedor = Array.from($('f-vendedor').options).some(o => o.value === e.vendedor) ? e.vendedor : 'todos';
+    document.querySelectorAll('.chip[data-filtro]').forEach(o => o.setAttribute('aria-pressed', String(o.dataset.filtro === filtro)));
+    $('f-cabe').setAttribute('aria-pressed', String(soloCabe));
+    $('f-vendedor').value = vendedor;
+    $('f-orden').value = orden;
+    pinta();
+    requestAnimationFrame(() => window.scrollTo(0, e.y || 0));
+  })();
+
+  // ---------------- datos nuevos ----------------
   const btn = $('btn-actualizar');
   const txt = $('estado-txt');
-  const generado = D.generado;
-  let esperando = false;
+  let visto = null;  // ultimo_ok del servidor cuando se cargo esta pagina
 
   const hace = iso => {
     const m = Math.round((Date.now() - new Date(iso)) / 60000);
@@ -1039,6 +1109,7 @@
     return `hace ${Math.round(m / 60)} h`;
   };
 
+  // Servida por servidor.py: se pregunta al servidor cada 10 s.
   async function mira(){
     let s;
     try { s = await (await fetch('/estado', {cache: 'no-store'})).json(); }
@@ -1046,29 +1117,38 @@
     $('bloque-refresco').hidden = false;
     btn.disabled = s.actualizando;
     txt.classList.toggle('mal', Boolean(s.ultimo_error));
-    if (s.actualizando){
-      txt.textContent = 'actualizando…';
-      esperando = true;
-    } else if (s.ultimo_error){
-      txt.textContent = s.ultimo_error;
-    } else {
-      txt.textContent = hace(s.ultimo_ok || generado);
-      // Si el servidor rehizo los datos mientras mirabamos, recargamos para verlos.
-      if (esperando && s.ultimo_ok && s.ultimo_ok > generado){ location.reload(); }
-      esperando = false;
-    }
+    if (s.actualizando) txt.textContent = 'actualizando…';
+    else if (s.ultimo_error) txt.textContent = s.ultimo_error;
+    else txt.textContent = hace(s.ultimo_ok || D.generado);
+    // Cualquier pase nuevo, lo lance el boton o el reloj del servidor. Se compara
+    // con lo visto al cargar y no con la hora de los datos, o recargaria en bucle.
+    if (visto === null) visto = s.ultimo_ok || '';
+    else if (s.ultimo_ok && s.ultimo_ok !== visto && !s.actualizando) recarga();
     return s;
   }
 
+  // Publicada en GitHub Pages: se mira si hay una version mas nueva de la pagina.
+  async function buscaNuevos(){
+    if (document.hidden) return;
+    try {
+      const r = await fetch(location.pathname + '?t=' + Date.now(), {cache: 'no-store'});
+      if (!r.ok) return;
+      const m = (await r.text()).match(/"generado":\s*"([^"]+)"/);
+      if (m && m[1] !== D.generado) recarga();
+    } catch (e) { /* sin red: se reintenta en la siguiente vuelta */ }
+  }
+
   btn.addEventListener('click', async () => {
-    btn.disabled = true; txt.textContent = 'actualizando…'; esperando = true;
+    btn.disabled = true; txt.textContent = 'actualizando…';
     try { await fetch('/actualizar', {method: 'POST'}); }
     catch (e) { txt.textContent = 'no se pudo avisar al servidor'; txt.classList.add('mal'); btn.disabled = false; }
   });
 
   mira().then(s => {
-    if (s === null) return;
-    setInterval(mira, 10000);
+    if (s !== null){ setInterval(mira, 10000); return; }
+    setInterval(buscaNuevos, 120000);
+    // Al volver a la app del iPhone tras un rato, se mira al momento.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) buscaNuevos(); });
   });
 })();
 </script>

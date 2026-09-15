@@ -100,7 +100,7 @@ def credenciales_laliga():
         clave = getpass.getpass("   Contrasena (no se ve al teclear): ")
         try:
             # Se prueban antes de guardarlas: un secreto con una errata solo se
-            # descubriria cuando el robot fallase dentro de 15 minutos.
+            # descubriria cuando el robot fallase en su siguiente pase.
             laliga_auth.login_password(email, clave)
             print("   Correctas.")
             return email, clave

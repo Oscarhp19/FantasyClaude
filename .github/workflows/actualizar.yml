@@ -2,9 +2,10 @@ name: Actualizar panel
 
 on:
   schedule:
-    # Cada 15 minutos. GitHub puede retrasar los cron cuando hay mucha carga,
-    # asi que en la practica a veces sale cada 17-20.
-    - cron: "*/15 * * * *"
+    # Cada 5 minutos, que es el minimo que GitHub admite. Bajo carga retrasa o
+    # se salta ejecuciones, asi que en la practica pueden ser 7-15. La pagina
+    # publicada busca por su cuenta una version nueva cada 2 minutos.
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}   # y a mano desde la pestana Actions
 
 permissions:
