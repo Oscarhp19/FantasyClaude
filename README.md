@@ -249,10 +249,15 @@ Azure AD B2C de LaLiga en `login.laliga.es`, con el `client_id` de la app móvil
 (`af88bcff-…`) porque es el único que acepta tanto contraseña como los logins
 federados. Dos policies distintas según la opción:
 
-- **Opción 1** — `B2C_1A_ResourceOwnerv2`, flujo ROPC: `grant_type=password`
-  contra el endpoint de token. El `scope` tiene que incluir el propio
-  `client_id` (`openid <client_id> offline_access`) o B2C emite un token con
-  otra audiencia y la API lo rechaza con 401.
+- **Opción 1** — hasta el 15/10/2026 era la policy ROPC
+  `B2C_1A_ResourceOwnerv2` (`grant_type=password`), pero LaLiga la retiró y
+  ahora da 404. Desde entonces se reproduce la página de login de B2C sin
+  navegador: se carga `authorize` (policy de la opción 2), se envían email y
+  contraseña a `SelfAsserted` con el `csrf` y el `transId` de su `SETTINGS`, y
+  `confirmed` redirige a `authredirect://...?code=`, que se canjea con PKCE. El
+  `scope` tiene que incluir el propio `client_id` (`openid <client_id>
+  offline_access`) o B2C emite un token con otra audiencia y la API lo rechaza
+  con 401.
 - **Opción 2** — `B2C_1A_5ULAIP_PARAMETRIZED_SIGNIN`, authorization code + PKCE.
   El `redirect_uri` es un esquema propio de la app que el navegador de
   escritorio no sabe abrir, pero deja el `code` en la barra de direcciones.

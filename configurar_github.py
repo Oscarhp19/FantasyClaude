@@ -104,7 +104,7 @@ def credenciales_laliga():
             laliga_auth.login_password(email, clave)
             print("   Correctas.")
             return email, clave
-        except urllib.error.HTTPError:
+        except laliga_auth.CredencialesIncorrectas:
             quedan = 2 - intento
             print(f"   No entran.{' Prueba otra vez.' if quedan else ''}")
     sys.exit(

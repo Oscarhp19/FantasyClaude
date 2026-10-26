@@ -7,7 +7,8 @@ federados (Google, Apple, Facebook) ademas del de email y contrasena.
 Hay dos formas de entrar, una sola vez:
 
 1. Email y contrasena, sin navegador (la mas simple, y la que funciona cuando
-   la pagina de login se queda muerta al pulsar el boton):
+   la pagina de login se queda muerta al pulsar el boton). Rellena por debajo
+   el mismo formulario que esa pagina:
 
     python laliga_auth.py password
 
@@ -22,8 +23,10 @@ viaja unicamente a login.laliga.es y no se guarda en ningun sitio.
 """
 import base64
 import hashlib
+import http.cookiejar
 import json
 import os
+import re
 import secrets
 import sys
 import time
@@ -35,11 +38,15 @@ from pathlib import Path
 AUTHORIZE = "https://login.laliga.es/laligadspprob2c.onmicrosoft.com/oauth2/v2.0/authorize"
 TOKEN_URL = "https://login.laliga.es/laligadspprob2c.onmicrosoft.com/oauth2/v2.0/token"
 POLICY = "B2C_1A_5ULAIP_PARAMETRIZED_SIGNIN"
-# Policy de "resource owner": acepta usuario y contrasena directos, sin navegador.
-# Es la salida cuando la pagina de login se queda muerta al pulsar el boton.
-POLICY_ROPC = "B2C_1A_ResourceOwnerv2"
+# La policy de "resource owner" (contrasena directa al endpoint de token) la
+# retiro LaLiga el 15/10/2026: ahora da 404. Los tokens viejos la llevan anotada.
+POLICY_RETIRADA = "B2C_1A_ResourceOwnerv2"
 CLIENT_NATIVO = "af88bcff-1157-40a0-b579-030728aacf0b"
 CLIENT_WEB = "6457fa17-1224-416a-b21a-ee6ce76e9bc0"
+# El scope incluye el propio client_id: sin eso B2C devuelve un token con otra
+# audiencia (o ninguno) y la API lo rechaza con 401.
+SCOPE = f"openid {CLIENT_NATIVO} offline_access"
+LOGIN_HOST = "https://login.laliga.es"
 # La app movil registra este esquema. El navegador de escritorio no sabe abrirlo,
 # pero deja la URL completa (con el code) en la barra de direcciones: con eso basta.
 REDIRECT = "authredirect://com.lfp.laligafantasy"
@@ -89,7 +96,8 @@ def _normaliza(resp, client_id, policy=POLICY):
     }
 
 
-def inicia_login():
+def _url_login():
+    """URL de authorize con PKCE recien generado. Devuelve (url, verifier, state)."""
     verifier = base64.urlsafe_b64encode(secrets.token_bytes(40)).rstrip(b"=").decode()
     challenge = (
         base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
@@ -100,13 +108,17 @@ def inicia_login():
         "client_id": CLIENT_NATIVO,
         "response_type": "code",
         "redirect_uri": REDIRECT,
-        "scope": "openid offline_access",
+        "scope": SCOPE,
         "code_challenge": challenge,
         "code_challenge_method": "S256",
         "state": state,
         "nonce": state,  # B2C exige nonce y aqui no hay nada mejor a lo que atarlo
     }
-    url = AUTHORIZE + "?" + urllib.parse.urlencode(params)
+    return AUTHORIZE + "?" + urllib.parse.urlencode(params), verifier, state
+
+
+def inicia_login():
+    url, verifier, state = _url_login()
     _escribe_privado(PENDIENTE, {"verifier": verifier, "state": state, "inicio": int(time.time())})
     return url
 
@@ -138,6 +150,12 @@ def canjea(codigo):
     if time.time() - pend["inicio"] > PENDIENTE_TTL:
         PENDIENTE.unlink(missing_ok=True)
         raise SystemExit("El login empezado ha caducado (15 min). Pide otro enlace.")
+    tokens = _canjea(codigo, pend["verifier"])
+    PENDIENTE.unlink(missing_ok=True)  # el verifier ya esta gastado
+    return tokens
+
+
+def _canjea(codigo, verifier):
     resp = _post_form(
         f"{TOKEN_URL}?p={POLICY}",
         {
@@ -145,49 +163,113 @@ def canjea(codigo):
             "client_id": CLIENT_NATIVO,
             "code": codigo,
             "redirect_uri": REDIRECT,
-            "code_verifier": pend["verifier"],
-            "scope": "openid offline_access",
+            "code_verifier": verifier,
+            "scope": SCOPE,
         },
     )
     tokens = _normaliza(resp, CLIENT_NATIVO)
     if not tokens["access_token"]:
         raise SystemExit(f"La respuesta no traia token: {resp}")
     _escribe_privado(TOKENS, tokens)
-    PENDIENTE.unlink(missing_ok=True)  # el verifier ya esta gastado
     return tokens
+
+
+class CredencialesIncorrectas(Exception):
+    pass
+
+
+class _SinRedirecciones(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None  # cada salto se mira a mano: el ultimo va a authredirect://
 
 
 def login_password(email, password):
-    """Flujo ROPC: la contrasena viaja solo a login.laliga.es y no se guarda."""
-    resp = _post_form(
-        f"{TOKEN_URL}?p={POLICY_ROPC}",
+    """Email y contrasena sin navegador, haciendo lo mismo que la pagina de login.
+
+    Desde que LaLiga retiro la policy de contrasena directa, la unica puerta es la
+    pagina de B2C: se carga authorize, se envian las credenciales a SelfAsserted
+    con el csrf y la transaccion que trae la pagina, y "confirmed" redirige a
+    authredirect://...?code=, que se canjea con PKCE como el login de navegador.
+    La contrasena viaja solo a login.laliga.es y no se guarda.
+    """
+    url, verifier, _ = _url_login()
+    abridor = urllib.request.build_opener(
+        urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()), _SinRedirecciones
+    )
+    cabeceras = {"User-Agent": "Mozilla/5.0", "Accept-Language": "es-ES,es;q=0.9"}
+
+    def abre(destino, datos=None, extra=None):
+        req = urllib.request.Request(destino, data=datos, headers={**cabeceras, **(extra or {})})
+        try:
+            with abridor.open(req, timeout=45) as r:
+                return r.status, r.headers, r.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            if e.code in (301, 302, 303, 307):
+                return e.code, e.headers, ""
+            raise
+
+    _, _, html = abre(url)
+    m = re.search(r"var SETTINGS = (\{.*?\});", html, re.S)
+    if not m:
+        raise SystemExit("La pagina de login de LaLiga ha cambiado: no encuentro SETTINGS.")
+    ajustes = json.loads(m.group(1))
+    base = LOGIN_HOST + ajustes["hosts"]["tenant"]
+    tx = {"tx": ajustes["transId"], "p": ajustes["hosts"]["policy"]}
+    # Los nombres de campo salen de la pagina (hoy signInName y password_login).
+    ids = re.findall(r'"ID": "([^"]+)"', html)
+    campo_pass = next((i for i in ids if i.startswith("password")), "password")
+
+    _, _, cuerpo = abre(
+        f"{base}/SelfAsserted?{urllib.parse.urlencode(tx)}",
+        urllib.parse.urlencode(
+            {"request_type": "RESPONSE", "signInName": email, campo_pass: password}
+        ).encode(),
         {
-            "grant_type": "password",
-            "client_id": CLIENT_NATIVO,
-            # El scope incluye el propio client_id: sin eso B2C devuelve un token
-            # con otra audiencia y la API lo rechaza con 401.
-            "scope": f"openid {CLIENT_NATIVO} offline_access",
-            "redirect_uri": REDIRECT,
-            "username": email,
-            "password": password,
-            "response_type": "id_token",
+            "X-CSRF-TOKEN": ajustes["csrf"],
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
         },
     )
-    tokens = _normaliza(resp, CLIENT_NATIVO, POLICY_ROPC)
-    if not tokens["access_token"]:
-        raise SystemExit(f"La respuesta no traia token: {resp}")
-    _escribe_privado(TOKENS, tokens)
-    return tokens
+    try:
+        respuesta = json.loads(cuerpo)
+    except ValueError:
+        raise SystemExit(f"Respuesta inesperada del login: {cuerpo[:300]}")
+    if str(respuesta.get("status")) != "200":
+        # 90225: contrasena mal; 90053/90054: no existe o credencial invalida.
+        if respuesta.get("errorCode") in ("AADB2C90225", "AADB2C90053", "AADB2C90054"):
+            raise CredencialesIncorrectas(respuesta.get("errorCode"))
+        raise SystemExit(f"El login de LaLiga ha respondido: {respuesta}")
+
+    destino = f"{base}/api/{ajustes['api']}/confirmed?" + urllib.parse.urlencode(
+        {"rememberMe": "false", "csrf_token": ajustes["csrf"], **tx}
+    )
+    for _ in range(6):
+        codigo_http, cab, html = abre(destino)
+        destino = urllib.parse.urljoin(destino, cab.get("Location") or "")
+        if destino.startswith(REDIRECT):
+            return _canjea(extrae_codigo(destino), verifier)
+        if codigo_http not in (301, 302, 303, 307):
+            # Otra pantalla intermedia (condiciones, verificacion...): no la sabemos pasar.
+            pantalla = re.search(r'"api": "([^"]+)"', html)
+            raise SystemExit(
+                "El login de LaLiga pide un paso mas que no se puede hacer sin navegador "
+                f"({pantalla.group(1) if pantalla else codigo_http}). "
+                "Entra una vez en la app oficial y vuelve a probar."
+            )
+    raise SystemExit("El login de LaLiga redirige en bucle.")
 
 
 def refresca(tokens):
     """El refresh token rota en cada uso: hay que guardar el nuevo si o si."""
     ultimo = None
     policy = tokens.get("policy", POLICY)
+    if policy == POLICY_RETIRADA:
+        policy = POLICY
     client_id = tokens.get("client_id") or CLIENT_NATIVO
     # Probamos primero la combinacion que emitio el token; el resto es red de seguridad.
     intentos = dict.fromkeys(
-        [(policy, client_id), (POLICY_ROPC, CLIENT_NATIVO), (POLICY, CLIENT_NATIVO), (POLICY, CLIENT_WEB)]
+        [(policy, client_id), (POLICY, CLIENT_NATIVO), (POLICY, CLIENT_WEB)]
     )
     for pol, cid in intentos:
         try:
@@ -226,6 +308,9 @@ def token_valido():
 
 
 def main():
+    # Sin esto, en el log de Actions los errores (stderr) salen antes que los
+    # avisos (stdout) y el orden engana.
+    sys.stdout.reconfigure(line_buffering=True)
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "asegura":
         # Para el robot de GitHub: reutiliza la sesion guardada y solo mete la
@@ -261,15 +346,15 @@ def main():
             )
         try:
             t = login_password(email, clave)
+        except CredencialesIncorrectas:
+            raise SystemExit(
+                "Email o contrasena incorrectos.\n"
+                "Si entras a LaLiga con Google, Apple o Facebook no tienes contrasena "
+                "propia: usa 'python laliga_auth.py login' o creala desde la app."
+            )
         except urllib.error.HTTPError as e:
             detalle = e.read().decode("utf-8", "replace")
-            if "AADB2C90225" in detalle or "invalid_grant" in detalle:
-                raise SystemExit(
-                    "Email o contrasena incorrectos.\n"
-                    "Si entras a LaLiga con Google, Apple o Facebook no tienes contrasena "
-                    "propia: usa 'python laliga_auth.py login' o creala desde la app."
-                )
-            raise SystemExit(f"HTTP {e.code}: {detalle[:400]}")
+            raise SystemExit(f"HTTP {e.code} en el login de LaLiga: {detalle[:400]}")
         finally:
             del clave
         print(f"\nSesion guardada en {TOKENS}")
